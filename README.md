@@ -14,8 +14,6 @@ android {
 
 dependencies {
         implementation(name: 'IJKPlayer', ext: 'aar')
-        implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
-        implementation 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.4'
 }
 
 ```
@@ -32,9 +30,7 @@ dependencies {
 ### B.项目/app/build.grade
 ```
 	dependencies {
-	    implementation 'com.github.RelinRan:IJKPlayer:1.0.0'
-        implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
-        implementation 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.4'
+	    implementation 'com.github.RelinRan:IJKPlayer:1.0.1'
 	}
 	android:configChanges="keyboardHidden|orientation|screenSize"
 ```

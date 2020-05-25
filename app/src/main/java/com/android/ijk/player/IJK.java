@@ -55,6 +55,13 @@ public class IJK {
 
     private IJK() {
         options = new ArrayList<>();
+        //加载IJK so文件
+        try {
+            IjkMediaPlayer.loadLibrariesOnce(null);
+            IjkMediaPlayer.native_profileBegin("libijkplayer.so");
+        } catch (Exception e) {
+
+        }
     }
 
     /**

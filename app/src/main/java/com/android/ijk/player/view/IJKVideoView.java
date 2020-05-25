@@ -363,7 +363,6 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         controlViewHolder.getPlayView().setImageResource(R.mipmap.ic_ijk_play_control);
         mediaPlayer.start();
         startVideoProgress();
-        showLoading();
     }
 
     /**
