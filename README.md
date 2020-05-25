@@ -32,7 +32,6 @@ dependencies {
 	dependencies {
 	    implementation 'com.github.RelinRan:IJKPlayer:1.0.1'
 	}
-	android:configChanges="keyboardHidden|orientation|screenSize"
 ```
 ## AndroidManifest.xml Activity配置
 ```
