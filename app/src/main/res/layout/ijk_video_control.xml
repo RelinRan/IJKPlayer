@@ -71,8 +71,8 @@
 
     <com.android.ijk.player.view.IJKCircleProgressView
         android:id="@+id/ijk_center_progress"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/ijk_loading_width"
+        android:layout_height="@dimen/ijk_loading_height"
         android:layout_gravity="center"
         android:background="@drawable/ijk_voice_brightness_background"
         android:padding="@dimen/ijk_voice_brightness_padding"
@@ -84,8 +84,8 @@
 
     <FrameLayout
         android:id="@+id/fl_ijk_loading"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/ijk_loading_width"
+        android:layout_height="@dimen/ijk_loading_height"
         android:layout_gravity="center"
         android:background="@drawable/ijk_voice_brightness_background">
 

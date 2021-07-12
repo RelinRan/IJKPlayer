@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -31,6 +32,7 @@ import com.android.ijk.player.helper.IJKHelper;
 import com.android.ijk.player.helper.OnIjkVideoTouchListener;
 import com.android.ijk.player.helper.Orientation;
 import com.android.ijk.player.listener.OnIJKVideoListener;
+import com.android.ijk.player.listener.OnIJKVideoSwitchScreenListener;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -109,6 +111,25 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
      * 最新图
      */
     private Bitmap bitmap;
+    /**
+     * 是否是直播数据源
+     */
+    private boolean liveSource;
+    /**
+     * 直播开始时间
+     */
+    private long liveStartTime = 0;
+    /**
+     * 是否已经准备过
+     */
+    private boolean isPrepared;
+
+    /**
+     * 屏幕切换监听
+     *
+     * @param context
+     */
+    private OnIJKVideoSwitchScreenListener onIJKVideoSwitchScreenListener;
 
 
     public IJKVideoView(@NonNull Context context) {
@@ -124,6 +145,40 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     public IJKVideoView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
+    }
+
+    /**
+     * 设置是否是直播源
+     *
+     * @param liveSource
+     */
+    public void setLiveSource(boolean liveSource) {
+        this.liveSource = liveSource;
+        if (isLiveSource()) {
+            controlViewHolder.getSeekBar().setEnabled(false);
+            controlViewHolder.getSeekBar().setThumb(null);
+        } else {
+            controlViewHolder.getSeekBar().setEnabled(true);
+            controlViewHolder.getSeekBar().setThumb(ContextCompat.getDrawable(getContext(), R.drawable.ijk_seek_dot));
+        }
+    }
+
+    /**
+     * 是否是直播源
+     *
+     * @return
+     */
+    public boolean isLiveSource() {
+        return liveSource;
+    }
+
+    /**
+     * 设置屏幕切换监听
+     *
+     * @param onIJKVideoSwitchScreenListener
+     */
+    public void setOnIJKVideoSwitchScreenListener(OnIJKVideoSwitchScreenListener onIJKVideoSwitchScreenListener) {
+        this.onIJKVideoSwitchScreenListener = onIJKVideoSwitchScreenListener;
     }
 
     /**
@@ -228,20 +283,24 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     @Override
     public void onClick(View view) {
         //底部播放、暂停 || 屏幕中间播放、暂停、重播
-        if (view.getId()==R.id.iv_ijk_play||view.getId()==R.id.iv_ijk_center){
+        if (view.getId() == R.id.iv_ijk_play || view.getId() == R.id.iv_ijk_center) {
             controlPlay(isPlayEnd);
         }
         //底部屏幕转换
-        if (view.getId()==R.id.iv_ijk_screen){
+        if (view.getId() == R.id.iv_ijk_screen) {
             isSwitchScreen = !isSwitchScreen;
             if (isSwitchScreen) {
                 container = (ViewGroup) getParent();
             }
-            controlViewHolder.getCoverImageView().setVisibility(VISIBLE);
+            controlViewHolder.getCoverImageView().setVisibility(GONE);
             controlViewHolder.getCoverImageView().setImageBitmap(bitmap);
             ijkHelper.switchScreen(getContext(), container, this, surface, isSwitchScreen ? Orientation.Horizontal : Orientation.Vertical);
+            if (onIJKVideoSwitchScreenListener != null) {
+                onIJKVideoSwitchScreenListener.onIJKVideoSwitchScreen(isSwitchScreen ? Orientation.Horizontal : Orientation.Vertical);
+            }
         }
     }
+
 
     //************************************[SeekBar监听]**************************************
     @Override
@@ -312,10 +371,14 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         if (isPlayEnd) {
             restart();
         } else {
-            if (mediaPlayer.isPlaying()) {
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                 pause();
             } else {
-                resume();
+                if (isPrepared) {
+                    resume();
+                } else {
+                    start();
+                }
             }
         }
     }
@@ -371,6 +434,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     public void start() {
         showLoading();
         isPlayEnd = false;
+        isPrepared = false;
         controlViewHolder.getCenterImageView().setVisibility(GONE);
         try {
             mediaPlayer.setDataSource(getContext(), uri, header);
@@ -393,6 +457,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         }
         AudioManager am = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         am.abandonAudioFocus(null);
+        stopVideoProgress();
     }
 
     /**
@@ -502,6 +567,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         Log.i(TAG, "->onSurfaceTextureAvailable " + i + "," + i1);
         this.surface = new Surface(surfaceTexture);
+        controlViewHolder.getCoverImageView().setVisibility(GONE);
         setSurface(surface);
     }
 
@@ -530,6 +596,10 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     @Override
     public void onPrepared(IMediaPlayer iMediaPlayer) {
         this.iMediaPlayer = iMediaPlayer;
+        isPrepared = true;
+        if (isLiveSource()) {
+            liveStartTime = System.currentTimeMillis();
+        }
         Log.i(TAG, "->onPrepared");
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoPrepared(iMediaPlayer);
@@ -674,9 +744,10 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == WHAT_GET_DURATION) {
-                long duration = iMediaPlayer.getDuration();
-                long current = iMediaPlayer.getCurrentPosition();
-                Log.i(TAG, "->onVideoProgress duration:" + duration + ",current：" + current);
+                long duration = isLiveSource() ? 0 : iMediaPlayer.getDuration();
+                liveStartTime = liveStartTime == 0 ? System.currentTimeMillis() : liveStartTime;
+                long current = isLiveSource() ? System.currentTimeMillis() - liveStartTime : iMediaPlayer.getCurrentPosition();
+                Log.i(TAG, "->onVideoProgress duration=" + duration + ",current=" + current + ",isLiveSource=" + isLiveSource());
                 onVideoProgress(iMediaPlayer, duration, current);
                 if (onIJKVideoListener != null) {
                     onIJKVideoListener.onVideoProgress(iMediaPlayer, iMediaPlayer.getDuration(), iMediaPlayer.getCurrentPosition());
@@ -758,7 +829,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     //*******************************[onTouchEvent]*********************************
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return ijkHelper.onTouchEvent(getContext(), event, this, mediaPlayer.getCurrentPosition(), mediaPlayer.getDuration(), this);
+        return ijkHelper.onTouchEvent(getContext(), isLiveSource(), event, this, mediaPlayer == null ? 0 : mediaPlayer.getCurrentPosition(), mediaPlayer.getDuration(), this);
     }
 
     @Override

@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--音量亮度进度线宽-->
     <dimen name="ijk_voice_brightness_stroke_width">2dp</dimen>
-    <dimen name="ijk_voice_brightness_padding">5dp</dimen>
+    <!--音量亮度进度距离padding-->
+    <dimen name="ijk_voice_brightness_padding">3dp</dimen>
+    <!--进度宽度-->
+    <dimen name="ijk_loading_width">40dp</dimen>
+    <!--进度高度-->
+    <dimen name="ijk_loading_height">40dp</dimen>
 </resources>

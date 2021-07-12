@@ -51,7 +51,7 @@ public class IJK {
     /**
      * 是否自动播放
      */
-    private boolean isAutoPlay;
+    private boolean isAutoPlay = true;
 
     private IJK() {
         options = new ArrayList<>();
