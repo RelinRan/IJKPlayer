@@ -1,6 +1,5 @@
 package com.android.ijk.player.view;
 
-import android.media.Image;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;

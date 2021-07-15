@@ -1,7 +1,8 @@
 package com.android.ijk.player;
 
-import android.support.annotation.LayoutRes;
 import android.view.View;
+
+import androidx.annotation.LayoutRes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +61,7 @@ public class IJK {
             IjkMediaPlayer.loadLibrariesOnce(null);
             IjkMediaPlayer.native_profileBegin("libijkplayer.so");
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 

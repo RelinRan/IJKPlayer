@@ -1,24 +1,23 @@
 package com.android.ijk.player.helper;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
 import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.ijk.player.view.IJKVideoView;
+
 
 /**
  * Author: Relin
@@ -50,11 +49,20 @@ public class IJKHelper {
     /**
      * 竖屏布局参数
      */
-    private ViewGroup.LayoutParams portraitParams;
+    private int portraitWidth = -3;
+    private int portraitHeight = -3;
+    /**
+     * 滑动距离极限
+     */
+    private int distanceLimit = 10;
     /**
      * 是否有ActionBar
      */
     private boolean isHaveActionBar;
+
+    public IJKHelper() {
+        Log.i(TAG, "->IJKHelper INIT");
+    }
 
     /**
      * 保持屏幕常亮
@@ -91,21 +99,19 @@ public class IJKHelper {
      *
      * @param orientation 方向
      */
-    @SuppressLint("SourceLockedOrientationActivity")
-    public void switchScreen(Context context, ViewGroup parent, IJKVideoView videoView, Surface surface, Orientation orientation) {
+    public void switchScreen(Context context, IJKVideoView videoView, Orientation orientation) {
         AppCompatActivity activity = (AppCompatActivity) context;
-//        FrameLayout content = findContent(context);
-//        if (content == null) {
-//            new RuntimeException("switch screen failed,find activity content is null.");
-//            return;
-//        }
-//        if (videoView == null) {
-//            new RuntimeException("switch screen failed,don't find view to do anything.");
-//        }
+        FrameLayout content = findContent(context);
+        if (content == null) {
+            new RuntimeException("switch screen failed,find activity content is null.");
+            return;
+        }
+        if (videoView == null) {
+            new RuntimeException("switch screen failed,don't find view to do anything.");
+            return;
+        }
         //切换横屏
-        if (orientation == Orientation.Horizontal) {
-            Log.i(TAG,"->switchScreen Horizontal");
-            portraitParams = videoView.getLayoutParams();
+        if (orientation==Orientation.LANDSCAPE) {
             //隐藏ActionBar
             if (activity.getSupportActionBar() != null) {
                 isHaveActionBar = activity.getSupportActionBar().isShowing();
@@ -117,43 +123,78 @@ public class IJKHelper {
             activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
             //隐藏状态栏
             activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-            ViewGroup.LayoutParams params = videoView.getLayoutParams();
-            params.width = FrameLayout.LayoutParams.MATCH_PARENT;
-            params.height = FrameLayout.LayoutParams.MATCH_PARENT;
-            videoView.setLayoutParams(params);
-
-            //将View添加到Content
-//            ViewGroup parentView = (ViewGroup) videoView.getParent();
-//            parentView.removeView(videoView);
-//            if (content != null) {
-//                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-//                content.addView(videoView, params);
-//                videoView.setSurface(surface);
-//            }
-        }
-        //切换竖屏
-        if (orientation == Orientation.Vertical) {
-            Log.i(TAG,"->switchScreen Vertical");
+        } else {
             //显示ActionBar
             if (isHaveActionBar) {
                 activity.getSupportActionBar().show();
             }
             //竖屏
             activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            //将View复原
-            videoView.setLayoutParams(portraitParams);
             //清除全屏标识
             activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            //显示状态栏
-            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-
-//            ViewGroup parentView = (ViewGroup) videoView.getParent();
-//            parentView.removeView(videoView);
-//            parent.addView(videoView, portraitParams);
-//            videoView.setSurface(surface);
         }
+        switchSettingViews(context, orientation);
+    }
+
+    /**
+     * 设置屏幕切换对应View
+     *
+     * @param context     上下文
+     * @param orientation 是否横屏
+     */
+    public void switchSettingViews(Context context, Orientation orientation) {
+        switchSettingViews(findContent(context), orientation);
+    }
+
+    /**
+     * 递归设置页面所有控件
+     *
+     * @param parent
+     * @param orientation
+     */
+    public void switchSettingViews(ViewGroup parent, Orientation orientation) {
+        int childCount = parent.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = parent.getChildAt(i);
+            if (child instanceof ViewGroup) {
+                if (child.getClass() == IJKVideoView.class) {
+                    ViewGroup.LayoutParams params = child.getLayoutParams();
+                    if (orientation==Orientation.LANDSCAPE && portraitWidth == -3) {
+                        portraitWidth = params.width;
+                        portraitHeight = params.height;
+                    }
+                    params.width = orientation==Orientation.LANDSCAPE ? FrameLayout.LayoutParams.MATCH_PARENT : portraitWidth;
+                    params.height = orientation==Orientation.LANDSCAPE ? FrameLayout.LayoutParams.MATCH_PARENT : portraitHeight;
+                    child.setLayoutParams(params);
+                    Log.i(TAG, "->child instanceof IJKVideoView portrait params width=" + portraitWidth + ",height=" + portraitHeight);
+                } else {
+                    boolean hasVideoViewChild = hasVideoViewChild((ViewGroup) child);
+                    if (!hasVideoViewChild) {
+                        child.setVisibility(orientation==Orientation.LANDSCAPE ? View.GONE : View.VISIBLE);
+                    } else {
+                        switchSettingViews((ViewGroup) child, orientation);
+                    }
+                }
+            } else {
+                child.setVisibility(orientation==Orientation.LANDSCAPE ? View.GONE : View.VISIBLE);
+            }
+        }
+    }
+
+    /**
+     * 是否存在视频播放的View
+     *
+     * @param parent
+     * @return
+     */
+    private boolean hasVideoViewChild(ViewGroup parent) {
+        int childCount = parent.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            if (parent.getChildAt(i) instanceof IJKVideoView) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -265,9 +306,12 @@ public class IJKHelper {
                 float height = view.getMeasuredHeight();
                 if (tan <= 1) {
                     if (!isLiveSource) {
+                        if (distanceX < distanceLimit) {
+                            break;
+                        }
                         isChangeVideoProgress = true;
                         float horizontalPercent = distanceX / width;
-                        position = (long) increaseDecreaseValue(distanceXValue, horizontalPercent, current, duration, 0, 1f, Orientation.Horizontal);
+                        position = (long) increaseDecreaseValue(distanceXValue, horizontalPercent, current, duration, 0, 1f, Orientation.LANDSCAPE);
                         Log.i(TAG, "->onTouchEvent ACTION_MOVE Horizontal percent:" + (position * 1.0f / duration) + ",duration:" + duration + ",current:" + current + ",position:" + position);
                         if (listener != null) {
                             listener.onVideoStartChangeProgress(position, position * 1.0f / duration);
@@ -278,18 +322,24 @@ public class IJKHelper {
                     //左边右边判断
                     float horizontalMiddleX = view.getMeasuredWidth() / 2;
                     if (downX < horizontalMiddleX) {//左边
+                        if (distanceX < distanceLimit) {
+                            break;
+                        }
                         //当前亮度值
-                        float brightness = increaseDecreaseValue(distanceYValue, verticalPercent, currentBrightness(context), 1f, 0f, 0.02f, Orientation.Vertical);
+                        float brightness = increaseDecreaseValue(distanceYValue, verticalPercent, currentBrightness(context), 1f, 0f, 0.02f, Orientation.PORTRAIT);
                         Log.i(TAG, "->onTouchEvent ACTION_MOVE Vertical Left percent:" + (brightness / 1f) + ",brightness：" + brightness);
                         if (listener != null) {
                             listener.onVideoChangeBrightness(brightness, brightness / 1f);
                         }
                     } else {//右边
+                        if (distanceX < distanceLimit) {
+                            break;
+                        }
                         float currentVoice = currentVoice(context);
                         float maxVoice = maxVoice(context);
                         Log.i(TAG, "->onTouchEvent ACTION_MOVE Vertical Right currentVoice:" + currentVoice + ",maxVoice：" + maxVoice);
                         //当前亮度值
-                        float voice = increaseDecreaseValue(distanceYValue, verticalPercent, currentVoice, maxVoice, 0, 0.02f, Orientation.Vertical);
+                        float voice = increaseDecreaseValue(distanceYValue, verticalPercent, currentVoice, maxVoice, 0, 0.02f, Orientation.PORTRAIT);
                         Log.i(TAG, "->onTouchEvent ACTION_MOVE Vertical Right percent:" + verticalPercent + ",voice：" + voice);
                         if (listener != null) {
                             listener.onVideoChangeVoice(voice, voice / maxVoice);
@@ -324,14 +374,14 @@ public class IJKHelper {
      * @return
      */
     public float increaseDecreaseValue(float distanceValue, float verticalPercent, float currentValue, float maxValue, float minValue, float coefficient, Orientation orientation) {
-        if (orientation == Orientation.Vertical) {
+        if (orientation == Orientation.PORTRAIT) {
             if (distanceValue > 0) {//向下滑动
                 currentValue -= verticalPercent * maxValue * coefficient;
             } else {//向上滑动
                 currentValue += verticalPercent * maxValue * coefficient;
             }
         }
-        if (orientation == Orientation.Horizontal) {
+        if (orientation == Orientation.LANDSCAPE) {
             if (distanceValue > 0) {//向右滑动
                 currentValue += verticalPercent * maxValue * coefficient;
             } else {//向左滑动

@@ -1,16 +1,15 @@
 package com.android.ijk.player.view;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -24,6 +23,10 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.android.ijk.player.IJK;
 import com.android.ijk.player.IJKOption;
@@ -53,7 +56,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         IMediaPlayer.OnErrorListener, IMediaPlayer.OnSeekCompleteListener,
         View.OnClickListener, SeekBar.OnSeekBarChangeListener, OnIjkVideoTouchListener, Cloneable {
 
-    private String TAG = "IJKVideoView";
+    private String TAG = IJKVideoView.class.getSimpleName();
     /**
      * 播放对象
      */
@@ -103,10 +106,6 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
      * 视频控件父容器
      */
     private ViewGroup container;
-    /**
-     * 是否全屏
-     */
-    private boolean isSwitchScreen;
     /**
      * 最新图
      */
@@ -188,8 +187,9 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
      * @param attrs   xml参数
      */
     private void init(Context context, AttributeSet attrs) {
-        container = (ViewGroup) getParent();
+        setBackgroundColor(Color.BLACK);
         ijkHelper = new IJKHelper();
+        container = (ViewGroup) getParent();
         initMediaPlayer();
         initVideoSurface(context);
         initControlViews();
@@ -233,7 +233,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
      */
     private void initVideoSurface(Context context) {
         //视频视图
-        FrameLayout.LayoutParams textureViewParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        LayoutParams textureViewParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         textureViewParams.gravity = Gravity.CENTER;
         if (textureView != null && getChildAt(0) instanceof TextureView) {
             removeView(textureView);
@@ -260,7 +260,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
             }
             controlView = LayoutInflater.from(getContext()).inflate(IJK.config().controlLayoutId(), null);
         }
-        FrameLayout.LayoutParams controlViewParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        LayoutParams controlViewParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         controlViewParams.gravity = Gravity.BOTTOM;
         addView(controlView, controlViewParams);
         controlViewHolder = new IJKControlViewHolder(this, controlView);
@@ -288,15 +288,15 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         }
         //底部屏幕转换
         if (view.getId() == R.id.iv_ijk_screen) {
-            isSwitchScreen = !isSwitchScreen;
-            if (isSwitchScreen) {
-                container = (ViewGroup) getParent();
+            Orientation orientation;
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                orientation = Orientation.LANDSCAPE;
+            } else {
+                orientation = Orientation.PORTRAIT;
             }
-            controlViewHolder.getCoverImageView().setVisibility(GONE);
-            controlViewHolder.getCoverImageView().setImageBitmap(bitmap);
-            ijkHelper.switchScreen(getContext(), container, this, surface, isSwitchScreen ? Orientation.Horizontal : Orientation.Vertical);
+            ijkHelper.switchScreen(getContext(), this, orientation);
             if (onIJKVideoSwitchScreenListener != null) {
-                onIJKVideoSwitchScreenListener.onIJKVideoSwitchScreen(isSwitchScreen ? Orientation.Horizontal : Orientation.Vertical);
+                onIJKVideoSwitchScreenListener.onIJKVideoSwitchScreen(orientation);
             }
         }
     }
@@ -458,6 +458,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         AudioManager am = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         am.abandonAudioFocus(null);
         stopVideoProgress();
+        IjkMediaPlayer.native_profileEnd();
     }
 
     /**
@@ -590,6 +591,9 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         this.surface = new Surface(surfaceTexture);
         bitmap = textureView.getBitmap();
         Log.i(TAG, "->onSurfaceTextureUpdated");
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            controlViewHolder.getCoverImageView().setVisibility(GONE);
+        }
     }
 
     //****************************************[TextureView - SurfaceTextureListener]**********************************************

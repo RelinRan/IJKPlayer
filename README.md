@@ -1,7 +1,7 @@
 # IJKPlayer
 IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 ## 方法一  ARR依赖
-[AndroidKit.arr](https://github.com/RelinRan/AndroidKit/blob/master/IJKPlayer.aar)
+[IJKPlayer.arr](https://github.com/RelinRan/AndroidKit/blob/master/IJKPlayer.aar)
 ```
 android {
     ....
@@ -30,7 +30,7 @@ dependencies {
 ### B.项目/app/build.grade
 ```
 	dependencies {
-	    implementation 'com.github.RelinRan:IJKPlayer:1.0.1'
+	    implementation 'com.github.RelinRan:IJKPlayer:1.0.2'
 	}
 ```
 ## AndroidManifest.xml Activity配置
