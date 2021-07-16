@@ -49,6 +49,7 @@ public class IJKHelper {
     /**
      * 竖屏布局参数
      */
+    private ViewGroup.LayoutParams portraitParams;
     private int portraitWidth = -3;
     private int portraitHeight = -3;
     /**
@@ -111,7 +112,8 @@ public class IJKHelper {
             return;
         }
         //切换横屏
-        if (orientation==Orientation.LANDSCAPE) {
+        if (orientation == Orientation.LANDSCAPE) {
+            Log.i(TAG,"->switchScreen Horizontal");
             //隐藏ActionBar
             if (activity.getSupportActionBar() != null) {
                 isHaveActionBar = activity.getSupportActionBar().isShowing();
@@ -133,7 +135,7 @@ public class IJKHelper {
             //清除全屏标识
             activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
-        switchSettingViews(context, orientation);
+        switchSettingViews(content, orientation);
     }
 
     /**
@@ -157,7 +159,7 @@ public class IJKHelper {
         for (int i = 0; i < childCount; i++) {
             View child = parent.getChildAt(i);
             if (child instanceof ViewGroup) {
-                if (child.getClass() == IJKVideoView.class) {
+                if (child instanceof IJKVideoView) {
                     ViewGroup.LayoutParams params = child.getLayoutParams();
                     if (orientation==Orientation.LANDSCAPE && portraitWidth == -3) {
                         portraitWidth = params.width;
@@ -168,12 +170,7 @@ public class IJKHelper {
                     child.setLayoutParams(params);
                     Log.i(TAG, "->child instanceof IJKVideoView portrait params width=" + portraitWidth + ",height=" + portraitHeight);
                 } else {
-                    boolean hasVideoViewChild = hasVideoViewChild((ViewGroup) child);
-                    if (!hasVideoViewChild) {
-                        child.setVisibility(orientation==Orientation.LANDSCAPE ? View.GONE : View.VISIBLE);
-                    } else {
-                        switchSettingViews((ViewGroup) child, orientation);
-                    }
+                    switchSettingViews((ViewGroup) child, orientation);
                 }
             } else {
                 child.setVisibility(orientation==Orientation.LANDSCAPE ? View.GONE : View.VISIBLE);
