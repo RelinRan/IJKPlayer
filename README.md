@@ -1,6 +1,6 @@
-# IJKPlayer
+#### IJKPlayer
 IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
-## 方法一  ARR依赖
+#### [AAR]
 [ijk_player.arr](https://github.com/RelinRan/IJKPlayer/blob/master/ijk_player.aar)
 ```
 android {
@@ -17,8 +17,8 @@ dependencies {
 }
 
 ```
-## 方法二   JitPack依赖
-### A.项目/build.grade
+#### JitPack
+项目/build.grade
 ```
 allprojects {
     repositories {
@@ -27,13 +27,13 @@ allprojects {
 	}
 }
 ```
-### B.项目/app/build.grade
+项目/app/build.grade
 ```
 dependencies {
 	    implementation 'com.github.RelinRan:IJKPlayer:1.0.3'
 	}
 ```
-## 权限配置
+#### 权限配置
 ```
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -41,7 +41,7 @@ dependencies {
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 ```
-## AndroidManifest.xml
+#### AndroidManifest.xml
 播放页面
 ```
 <activity
@@ -69,7 +69,7 @@ android:usesCleartextTraffic="true"
 </provider>
 ```
 
-## xml布局
+#### xml布局
 ```
 <com.android.ijk.player.view.IJKVideoView
     android:id="@+id/ijk"
@@ -77,7 +77,7 @@ android:usesCleartextTraffic="true"
     android:layout_height="220dp"
     android:background="@color/colorBlack"/>
 ```
-## 参数配置
+#### 参数配置
 ```
 //初始化建议配置在Application
 IJK ijk = IJK.config().initOptions();
@@ -108,7 +108,7 @@ ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1L);
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1);
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "fastseek");
 ```
-## 播放视频
+#### 播放视频
 ```
 IJKVideoView ijk = findViewById(R.id.ijk);
 //是否是直播源
