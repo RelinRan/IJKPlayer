@@ -68,6 +68,33 @@ android:usesCleartextTraffic="true"
     </intent-filter>
 </provider>
 ```
+path.xml
+```
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <root-path
+        name="root"
+        path="/storage/emulated/0" />
+    <files-path
+        name="files"
+        path="/storage/emulated/0/Android/data/${applicationId}/files" />
+    <cache-path
+        name="cache"
+        path="/storage/emulated/0/Android/data/${applicationId}/cache" />
+    <external-path
+        name="external"
+        path="/storage/emulated/0/Android/data/${applicationId}/external" />
+    <external-files-path
+        name="Capture"
+        path="/storage/emulated/0/Android/data/${applicationId}/files/Capture" />
+    <external-cache-path
+        name="Pick"
+        path="/storage/emulated/0/Android/data/${applicationId}/files/Pick" />
+    <external-cache-path
+        name="TBS"
+        path="/storage/emulated/0/Android/data/${applicationId}/files/TBS" />
+</paths>
+```
 
 #### xml布局
 ```
