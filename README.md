@@ -107,11 +107,14 @@ path.xml
 #### 参数配置
 ```
 //初始化建议配置在Application
-IJK ijk = IJK.config().initOptions();
+IJK ijk = IJK.config();
 //启用硬解码器
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 1);
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 1);
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
 //启用硬解码器（如果设备支持）
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "videotoolbox", 1);
+//ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "videotoolbox", 1);
 //设置探测缓冲区大小
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "probesize", 1024 * 10);
 //设置最小缓冲帧数
@@ -131,6 +134,8 @@ ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 0L);
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "flush_packets", 1L);
 //允许丢帧
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1L);
+//调用prepareAsync()方法后是否自动开始播放
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 1L);
 //优化进度跳转
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1);
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "fastseek");
