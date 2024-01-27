@@ -391,6 +391,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         return  mediaPlayer.isPlaying();
     }
 
+
     /**
      * 视频重新播放
      */
