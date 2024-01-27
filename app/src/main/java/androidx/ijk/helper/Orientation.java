@@ -1,4 +1,4 @@
-package com.android.ijk.player.helper;
+package androidx.ijk.helper;
 
 public enum Orientation {
     LANDSCAPE, PORTRAIT

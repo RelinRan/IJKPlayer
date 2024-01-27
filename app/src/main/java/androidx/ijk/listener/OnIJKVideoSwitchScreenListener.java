@@ -1,6 +1,6 @@
-package com.android.ijk.player.listener;
+package androidx.ijk.listener;
 
-import com.android.ijk.player.helper.Orientation;
+import androidx.ijk.helper.Orientation;
 
 public interface OnIJKVideoSwitchScreenListener {
 

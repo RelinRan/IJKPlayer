@@ -69,7 +69,7 @@
         android:layout_gravity="center"
         android:src="@mipmap/ic_ijk_pause_center"></ImageView>
 
-    <com.android.ijk.player.view.IJKCircleProgressView
+    <androidx.ijk.view.IJKCircleProgressView
         android:id="@+id/ijk_center_progress"
         android:layout_width="@dimen/ijk_loading_width"
         android:layout_height="@dimen/ijk_loading_height"
@@ -80,7 +80,7 @@
         app:ijkProgressStrokeWidth="@dimen/ijk_voice_brightness_stroke_width"
         app:ijkProgressText="音"
         app:ijkProgressTextColor="@color/ijk_voice_brightness_text_color"
-        app:ijkProgressTextSize="10sp"></com.android.ijk.player.view.IJKCircleProgressView>
+        app:ijkProgressTextSize="10sp"></androidx.ijk.view.IJKCircleProgressView>
 
     <FrameLayout
         android:id="@+id/fl_ijk_loading"

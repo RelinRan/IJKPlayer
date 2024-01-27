@@ -1,4 +1,4 @@
-package com.android.ijk.player.view;
+package androidx.ijk.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -6,7 +6,7 @@ import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 
-import com.android.ijk.player.IJK;
+import androidx.ijk.IJK;
 
 /**
  * Author: Relin

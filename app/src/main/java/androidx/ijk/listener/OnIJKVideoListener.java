@@ -1,4 +1,4 @@
-package com.android.ijk.player.listener;
+package androidx.ijk.listener;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 

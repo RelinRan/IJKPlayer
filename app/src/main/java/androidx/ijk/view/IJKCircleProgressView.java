@@ -1,4 +1,4 @@
-package com.android.ijk.player.view;
+package androidx.ijk.view;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -12,8 +12,8 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.ijk.R;
 
-import com.android.ijk.player.R;
 
 /**
  * Created by Relin

@@ -1,4 +1,4 @@
-package com.android.ijk.player.view;
+package androidx.ijk.view;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -28,14 +28,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import com.android.ijk.player.IJK;
-import com.android.ijk.player.IJKOption;
-import com.android.ijk.player.R;
-import com.android.ijk.player.helper.IJKHelper;
-import com.android.ijk.player.helper.OnIjkVideoTouchListener;
-import com.android.ijk.player.helper.Orientation;
-import com.android.ijk.player.listener.OnIJKVideoListener;
-import com.android.ijk.player.listener.OnIJKVideoSwitchScreenListener;
+import androidx.ijk.IJK;
+import androidx.ijk.IJKOption;
+import androidx.ijk.R;
+import androidx.ijk.helper.IJKHelper;
+import androidx.ijk.helper.OnIjkVideoTouchListener;
+import androidx.ijk.helper.Orientation;
+import androidx.ijk.listener.OnIJKVideoListener;
+import androidx.ijk.listener.OnIJKVideoSwitchScreenListener;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -384,6 +384,14 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     }
 
     /**
+     * 是否正在播放
+     * @return
+     */
+    public boolean isPlaying(){
+        return  mediaPlayer.isPlaying();
+    }
+
+    /**
      * 视频重新播放
      */
     public void restart() {
@@ -459,6 +467,14 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         am.abandonAudioFocus(null);
         stopVideoProgress();
         IjkMediaPlayer.native_profileEnd();
+    }
+
+    /**
+     * 重置播放器
+     */
+    public void reset(){
+        release();
+        initMediaPlayer();
     }
 
     /**
@@ -566,7 +582,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     //****************************************[TextureView - SurfaceTextureListener]**********************************************
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-        Log.i(TAG, "->onSurfaceTextureAvailable " + i + "," + i1);
+        Log.i(TAG, "onSurfaceTextureAvailable " + i + "," + i1);
         this.surface = new Surface(surfaceTexture);
         controlViewHolder.getCoverImageView().setVisibility(GONE);
         setSurface(surface);
@@ -575,13 +591,13 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
         this.surface = new Surface(surfaceTexture);
-        Log.i(TAG, "->onSurfaceTextureSizeChanged " + i + "," + i1);
+        Log.i(TAG, "onSurfaceTextureSizeChanged " + i + "," + i1);
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
         this.surface = new Surface(surfaceTexture);
-        Log.i(TAG, "->onSurfaceTextureDestroyed");
+        Log.i(TAG, "onSurfaceTextureDestroyed");
         surface.release();
         return false;
     }
@@ -590,7 +606,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
         this.surface = new Surface(surfaceTexture);
         bitmap = textureView.getBitmap();
-        Log.i(TAG, "->onSurfaceTextureUpdated");
+        Log.i(TAG, "onSurfaceTextureUpdated");
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             controlViewHolder.getCoverImageView().setVisibility(GONE);
         }
@@ -604,7 +620,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         if (isLiveSource()) {
             liveStartTime = System.currentTimeMillis();
         }
-        Log.i(TAG, "->onPrepared");
+        Log.i(TAG, "onPrepared");
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoPrepared(iMediaPlayer);
         }
@@ -616,7 +632,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         if (textureView != null) {
             textureView.setVideoSize(width, height);
         }
-        Log.i(TAG, "->onVideoSizeChanged width:" + width + ",height:" + height + ",sarNum：" + sarNum + ",sarDen:" + sarDen);
+        Log.i(TAG, "onVideoSizeChanged width:" + width + ",height:" + height + ",sarNum：" + sarNum + ",sarDen:" + sarDen);
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoSizeChanged(iMediaPlayer, width, height, sarNum, sarDen);
         }
@@ -625,7 +641,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     @Override
     public boolean onInfo(IMediaPlayer iMediaPlayer, int what, int args) {
         this.iMediaPlayer = iMediaPlayer;
-        Log.i(TAG, "->onInfo what:" + what + ",args:" + args);
+        Log.i(TAG, "onInfo what:" + what + ",args:" + args);
         if (what == IjkMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
             controlViewHolder.getPlayView().setImageResource(R.mipmap.ic_ijk_play_control);
             if (onIJKVideoListener != null) {
@@ -686,7 +702,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     @Override
     public void onSeekComplete(IMediaPlayer iMediaPlayer) {
         this.iMediaPlayer = iMediaPlayer;
-        Log.i(TAG, "->onSeekComplete");
+        Log.i(TAG, "onSeekComplete");
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoSeekComplete(iMediaPlayer);
         }
@@ -699,7 +715,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         this.iMediaPlayer = iMediaPlayer;
         //播放完毕，进度条满格
         showVideoTime(iMediaPlayer.getDuration(), controlViewHolder.getCurrentView());
-        Log.i(TAG, "->onCompletion");
+        Log.i(TAG, "onCompletion");
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoCompletion(iMediaPlayer);
         }
@@ -709,7 +725,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     public boolean onError(IMediaPlayer iMediaPlayer, int framework_err, int impl_err) {
         dismissLoading();
         this.iMediaPlayer = iMediaPlayer;
-        Log.i(TAG, "->onError framework_err:" + framework_err + ",impl_err:" + impl_err);
+        Log.i(TAG, "onError framework_err:" + framework_err + ",impl_err:" + impl_err);
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoError(iMediaPlayer, framework_err, impl_err);
         }
@@ -751,7 +767,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
                 long duration = isLiveSource() ? 0 : iMediaPlayer.getDuration();
                 liveStartTime = liveStartTime == 0 ? System.currentTimeMillis() : liveStartTime;
                 long current = isLiveSource() ? System.currentTimeMillis() - liveStartTime : iMediaPlayer.getCurrentPosition();
-                Log.i(TAG, "->onVideoProgress duration=" + duration + ",current=" + current + ",isLiveSource=" + isLiveSource());
+                Log.i(TAG, "onVideoProgress duration=" + duration + ",current=" + current + ",isLiveSource=" + isLiveSource());
                 onVideoProgress(iMediaPlayer, duration, current);
                 if (onIJKVideoListener != null) {
                     onIJKVideoListener.onVideoProgress(iMediaPlayer, iMediaPlayer.getDuration(), iMediaPlayer.getCurrentPosition());
@@ -818,13 +834,13 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.i(TAG, "->onInterceptTouchEvent ACTION_DOWN");
+                Log.i(TAG, "onInterceptTouchEvent ACTION_DOWN");
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.i(TAG, "->onInterceptTouchEvent ACTION_MOVE");
+                Log.i(TAG, "onInterceptTouchEvent ACTION_MOVE");
                 break;
             case MotionEvent.ACTION_UP:
-                Log.i(TAG, "->onInterceptTouchEvent ACTION_UP");
+                Log.i(TAG, "onInterceptTouchEvent ACTION_UP");
                 break;
         }
         return super.onInterceptTouchEvent(ev);

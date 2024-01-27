@@ -1,4 +1,4 @@
-package com.android.ijk.player.helper;
+package androidx.ijk.helper;
 
 import android.app.Activity;
 import android.app.Service;
@@ -16,7 +16,7 @@ import android.widget.FrameLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.ijk.player.view.IJKVideoView;
+import androidx.ijk.view.IJKVideoView;
 
 
 /**

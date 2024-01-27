@@ -1,4 +1,4 @@
-package com.android.ijk.player;
+package androidx.ijk;
 
 /**
  * Author: Relin

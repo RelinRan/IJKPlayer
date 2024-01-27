@@ -1,4 +1,4 @@
-package com.android.ijk.player.view;
+package androidx.ijk.view;
 
 import android.view.View;
 import android.widget.FrameLayout;
@@ -6,7 +6,8 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.android.ijk.player.R;
+import androidx.ijk.R;
+
 
 /**
  * Author: Relin

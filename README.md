@@ -30,7 +30,7 @@ allprojects {
 项目/app/build.grade
 ```
 dependencies {
-	    implementation 'com.github.RelinRan:IJKPlayer:1.0.3'
+	    implementation 'com.github.RelinRan:IJKPlayer:2024.1.27.1'
 	}
 ```
 #### 权限配置
@@ -98,7 +98,7 @@ path.xml
 
 #### xml布局
 ```
-<com.android.ijk.player.view.IJKVideoView
+<androidx.ijk.view.IJKVideoView
     android:id="@+id/ijk"
     android:layout_width="match_parent"
     android:layout_height="220dp"

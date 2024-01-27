@@ -1,4 +1,4 @@
-package com.android.ijk.player;
+package androidx.ijk;
 
 import android.view.View;
 
