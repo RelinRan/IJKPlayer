@@ -259,10 +259,10 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
                 IJK.config().controlLayoutId(R.layout.ijk_video_control);
             }
             controlView = LayoutInflater.from(getContext()).inflate(IJK.config().controlLayoutId(), null);
+            LayoutParams controlViewParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+            controlViewParams.gravity = Gravity.BOTTOM;
+            addView(controlView, controlViewParams);
         }
-        LayoutParams controlViewParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        controlViewParams.gravity = Gravity.BOTTOM;
-        addView(controlView, controlViewParams);
         controlViewHolder = new IJKControlViewHolder(this, controlView);
         controlViewHolder.findViews();
         //中间控件隐藏
@@ -278,6 +278,8 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         controlViewHolder.getCenterImageView().setOnClickListener(this);
         //进度条监听
         controlViewHolder.getSeekBar().setOnSeekBarChangeListener(this);
+        //是否直播
+        controlView.setVisibility(isLiveSource() ? GONE : VISIBLE);
     }
 
     @Override
@@ -385,10 +387,11 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
 
     /**
      * 是否正在播放
+     *
      * @return
      */
-    public boolean isPlaying(){
-        return  mediaPlayer.isPlaying();
+    public boolean isPlaying() {
+        return mediaPlayer.isPlaying();
     }
 
 
@@ -473,9 +476,9 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     /**
      * 重置播放器
      */
-    public void reset(){
+    public void reset() {
         release();
-        initMediaPlayer();
+        initVideoSurface(getContext());
     }
 
     /**
