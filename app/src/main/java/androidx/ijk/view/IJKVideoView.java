@@ -17,6 +17,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceHolder;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -198,7 +199,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     /**
      * 初始化媒体对象
      */
-    private void initMediaPlayer() {
+    public void initMediaPlayer() {
         //禁用多点触控
         setMotionEventSplittingEnabled(false);
         //初始化
@@ -214,6 +215,8 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
                 mediaPlayer.setOption(option.getCategory(), option.getName(), (Long) option.getValue());
             }
         }
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mediaPlayer.setScreenOnWhilePlaying(true);
         //设置监听
         mediaPlayer.setOnPreparedListener(this);
         mediaPlayer.setOnVideoSizeChangedListener(this);
@@ -231,7 +234,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
      *
      * @param context
      */
-    private void initVideoSurface(Context context) {
+    public void initVideoSurface(Context context) {
         //视频视图
         LayoutParams textureViewParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         textureViewParams.gravity = Gravity.CENTER;
@@ -251,7 +254,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     /**
      * 初始化控制器View
      */
-    private void initControlViews() {
+    public void initControlViews() {
         //控制器
         controlView = IJK.config().controlView();
         if (controlView == null) {
@@ -362,6 +365,11 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
             header.put("Cache-Control", "no-store");
         }
         this.header = header;
+        try {
+            mediaPlayer.setDataSource(getContext(), uri, header);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -394,6 +402,82 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         return mediaPlayer.isPlaying();
     }
 
+    /**
+     * 获取播放源
+     *
+     * @return
+     */
+    public String getDataSource() {
+        return mediaPlayer.getDataSource();
+    }
+
+    /**
+     * 获取视频时长
+     *
+     * @return
+     */
+    public long getDuration() {
+        return mediaPlayer.getDuration();
+    }
+
+    /**
+     * 获取当前进度位置
+     *
+     * @return
+     */
+    public long getCurrentPosition() {
+        return mediaPlayer.getCurrentPosition();
+    }
+
+    /**
+     * 进度控制
+     *
+     * @param msec
+     */
+    public void seekTo(long msec) {
+        mediaPlayer.seekTo(msec);
+    }
+
+    /**
+     * 将播放器设置为循环播放机或非循环播放机。
+     *
+     * @param looping
+     */
+    public void setLooping(boolean looping) {
+        mediaPlayer.setLooping(looping);
+    }
+
+    /**
+     * 设置显示器
+     *
+     * @param holder
+     */
+    public void setDisplay(SurfaceHolder holder) {
+        mediaPlayer.setDisplay(holder);
+    }
+
+    /**
+     * 保持屏幕持续点亮 --避免息屏
+     *
+     * @param keepInBackground
+     */
+    public void setKeepInBackground(boolean keepInBackground) {
+        mediaPlayer.setKeepInBackground(keepInBackground);
+    }
+
+    /**
+     * 重置播放器
+     */
+    public void reset() {
+        mediaPlayer.reset();
+    }
+
+    /**
+     * 停止播放
+     */
+    public void stop() {
+        mediaPlayer.stop();
+    }
 
     /**
      * 视频重新播放
@@ -405,6 +489,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         controlViewHolder.getSeekBar().setProgress(0);
         showVideoTime(0, controlViewHolder.getCurrentView());
         showVideoTime(0, controlViewHolder.getDurationView());
+        setDataSource(path);
         start();
     }
 
@@ -441,6 +526,15 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     }
 
     /**
+     * 异步准备
+     */
+    public void prepareAsync() {
+        isPlayEnd = false;
+        isPrepared = false;
+        mediaPlayer.prepareAsync();
+    }
+
+    /**
      * 开始播放
      */
     public void start() {
@@ -448,14 +542,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         isPlayEnd = false;
         isPrepared = false;
         controlViewHolder.getCenterImageView().setVisibility(GONE);
-        try {
-            mediaPlayer.setDataSource(getContext(), uri, header);
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.setScreenOnWhilePlaying(true);
-            mediaPlayer.prepareAsync();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mediaPlayer.prepareAsync();
     }
 
     /**
@@ -463,23 +550,21 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
      */
     public void release() {
         if (mediaPlayer != null) {
-            mediaPlayer.reset();
             mediaPlayer.release();
-            mediaPlayer = null;
         }
+    }
+
+    /**
+     * 销毁资源
+     */
+    public void destroy() {
+        release();
         AudioManager am = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         am.abandonAudioFocus(null);
         stopVideoProgress();
         IjkMediaPlayer.native_profileEnd();
     }
 
-    /**
-     * 重置播放器
-     */
-    public void reset() {
-        release();
-        initVideoSurface(getContext());
-    }
 
     /**
      * 获取控制器View
@@ -554,6 +639,13 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     }
 
     /**
+     * @return
+     */
+    public SurfaceTexture getSurfaceTexture() {
+        return textureView.getSurfaceTexture();
+    }
+
+    /**
      * 获取视频显示器
      *
      * @return
@@ -575,6 +667,17 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     }
 
     /**
+     * 设置播放期间屏幕常亮
+     *
+     * @param screenOn
+     */
+    public void setScreenOnWhilePlaying(boolean screenOn) {
+        if (mediaPlayer != null) {
+            mediaPlayer.setScreenOnWhilePlaying(screenOn);
+        }
+    }
+
+    /**
      * 获取容器
      *
      * @return
@@ -585,22 +688,20 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
 
     //****************************************[TextureView - SurfaceTextureListener]**********************************************
     @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-        Log.i(TAG, "onSurfaceTextureAvailable " + i + "," + i1);
-        this.surface = new Surface(surfaceTexture);
+    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
+        Log.i(TAG, "onSurfaceTextureAvailable " + width + "," + height);
+        surface = new Surface(surfaceTexture);
         controlViewHolder.getCoverImageView().setVisibility(GONE);
         setSurface(surface);
     }
 
     @Override
-    public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
-        this.surface = new Surface(surfaceTexture);
-        Log.i(TAG, "onSurfaceTextureSizeChanged " + i + "," + i1);
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int width, int height) {
+        Log.i(TAG, "onSurfaceTextureSizeChanged " + width + "," + height);
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
-        this.surface = new Surface(surfaceTexture);
         Log.i(TAG, "onSurfaceTextureDestroyed");
         surface.release();
         return false;
@@ -608,7 +709,6 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-        this.surface = new Surface(surfaceTexture);
         bitmap = textureView.getBitmap();
         Log.i(TAG, "onSurfaceTextureUpdated");
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
@@ -623,6 +723,9 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         isPrepared = true;
         if (isLiveSource()) {
             liveStartTime = System.currentTimeMillis();
+        }
+        if (surface!=null){
+            iMediaPlayer.setSurface(surface);
         }
         Log.i(TAG, "onPrepared");
         if (onIJKVideoListener != null) {
@@ -821,7 +924,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     /**
      * 显示Loading
      */
-    protected void showLoading() {
+    public void showLoading() {
         controlViewHolder.getLoadingView().setVisibility(VISIBLE);
         AnimationDrawable drawable = (AnimationDrawable) controlViewHolder.getLoadingImageView().getBackground();
         drawable.start();
@@ -830,7 +933,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     /**
      * 消失Loading
      */
-    protected void dismissLoading() {
+    public void dismissLoading() {
         controlViewHolder.getLoadingView().setVisibility(GONE);
     }
 

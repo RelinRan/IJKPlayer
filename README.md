@@ -146,7 +146,15 @@ IJKVideoView ijk = findViewById(R.id.ijk);
 //是否是直播源
 ijk.setLiveSource(true);
 //播放视频
-ijk.setDataSource("http://xxx");
+String url = "http://xxx";
 //开始播放
-ijk.start();
+String source = ijk.getDataSource();
+if (TextUtils.isEmpty(source)) {
+    ijk.setDataSource(url);
+    ijk.start();
+} else {
+    ijk.reset();
+    ijk.setDataSource(url);
+    ijk.prepareAsync();
+}
 ```
