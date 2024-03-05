@@ -6,6 +6,7 @@ IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 2.Android 11以上高版本报错问题;  
 3.音量、光亮、进度调节逻辑修改;  
 
+
 #### [AAR]
 [ijk-2024.3.5.1.aar](https://github.com/RelinRan/IJKPlayer/blob/master/ijk-2024.3.5.1.aar)
 ```
