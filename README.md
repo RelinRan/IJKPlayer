@@ -1,7 +1,13 @@
 #### IJKPlayer
 IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
+
+#### FIX - 2024.3.5.1
+1.更新编译为ff4.0--ijk0.8.8--20210426--001版本;  
+2.Android 11以上高版本报错问题;  
+3.音量、光亮、进度调节逻辑修改;  
+
 #### [AAR]
-[ijk_player.arr](https://github.com/RelinRan/IJKPlayer/blob/master/ijk_player.aar)
+[ijk-2024.3.5.1.aar](https://github.com/RelinRan/IJKPlayer/blob/master/ijk-2024.3.5.1.aar)
 ```
 android {
     ....
@@ -30,7 +36,7 @@ allprojects {
 项目/app/build.grade
 ```
 dependencies {
-	    implementation 'com.github.RelinRan:IJKPlayer:2024.2.4.1'
+	    implementation 'com.github.RelinRan:IJKPlayer:2024.3.5.1'
 	}
 ```
 #### 权限配置
@@ -145,6 +151,10 @@ ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "fastseek");
 IJKVideoView ijk = findViewById(R.id.ijk);
 //是否是直播源
 ijk.setLiveSource(true);
+//自定义全屏还是小屏幕显示，不设置就采用默认的逻辑；
+ijk.setOnIJKVideoSwitchScreenListener(orientation -> {
+    //TODO: 自定显示方式 
+});
 //播放视频
 String url = "http://xxx";
 //开始播放
@@ -157,4 +167,33 @@ if (TextUtils.isEmpty(source)) {
     ijk.setDataSource(url);
     ijk.prepareAsync();
 }
+```
+
+#### 颜色配置
+```
+<!--Seek圆点颜色-->
+<color name="ijk_seek_dot">#DDDDDD</color>
+<!--进度条进度颜色-->
+<color name="ijk_seek_progress">#03DAC5</color>
+<!--进度条背景颜色-->
+<color name="ijk_seek_background">#E8E8E9</color>
+<!--进度条缓冲进度颜色-->
+<color name="ijk_seek_secondary_progress">#F0F0F1</color>
+<!--声音/亮度背景颜色-->
+<color name="ijk_voice_brightness_background">#80000000</color>
+<!--声音/亮度文字颜色-->
+<color name="ijk_voice_brightness_text_color">#FFFFFF</color>
+<!--声音/亮度进度颜色-->
+<color name="ijk_voice_brightness_progress_color">#03DAC5</color>
+```
+#### 尺寸配置
+```
+<!--音量亮度进度线宽-->
+<dimen name="ijk_voice_brightness_stroke_width">2dp</dimen>
+<!--音量亮度进度距离padding-->
+<dimen name="ijk_voice_brightness_padding">3dp</dimen>
+<!--进度宽度-->
+<dimen name="ijk_loading_width">60dp</dimen>
+<!--进度高度-->
+<dimen name="ijk_loading_height">60dp</dimen>
 ```

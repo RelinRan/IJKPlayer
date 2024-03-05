@@ -5,7 +5,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,7 +14,6 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import androidx.ijk.view.IJKVideoView;
 
 
@@ -26,43 +24,43 @@ import androidx.ijk.view.IJKVideoView;
  */
 public class IJKHelper {
 
-    /**
-     * 标识
-     */
-    private static String TAG = "IJKHelper";
-    /**
-     * 当前音量
-     */
-    private float currentVoice = 0f;
-    /**
-     * 按下坐标
-     */
+    //标识
+    private static String TAG = IJKHelper.class.getSimpleName();
+    //按下坐标
     private float downX, downY;
-    /**
-     * 视频当前位置
-     */
-    private long position;
-    /**
-     * 是否改变进度
-     */
+    //是否改变进度
     private boolean isChangeVideoProgress;
-    /**
-     * 竖屏布局参数
-     */
+    //竖屏布局参数
     private ViewGroup.LayoutParams portraitParams;
     private int portraitWidth = -3;
     private int portraitHeight = -3;
-    /**
-     * 滑动距离极限
-     */
-    private int distanceLimit = 10;
-    /**
-     * 是否有ActionBar
-     */
+    //是否有ActionBar
     private boolean isHaveActionBar;
+    //音量控制
+    private AudioManager audioManager;
+    //当前音量
+    private int currentVolume = -1;
+    //最大值音量
+    private int maxVolume = -1;
+    //当前亮度
+    private float currentBrightness = -1F;
+    //当前进度
+    private long currentProgress = -1;
+    //是否调试模式
+    private boolean debug = true;
+
 
     public IJKHelper() {
-        Log.i(TAG, "->IJKHelper INIT");
+        Log.d(TAG, "IJKHelper INIT");
+    }
+
+    /**
+     * 设置是否调试模式
+     *
+     * @param debug
+     */
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     /**
@@ -113,7 +111,7 @@ public class IJKHelper {
         }
         //切换横屏
         if (orientation == Orientation.LANDSCAPE) {
-            Log.i(TAG,"->switchScreen Horizontal");
+            Log.i(TAG, "->switchScreen Horizontal");
             //隐藏ActionBar
             if (activity.getSupportActionBar() != null) {
                 isHaveActionBar = activity.getSupportActionBar().isShowing();
@@ -161,19 +159,21 @@ public class IJKHelper {
             if (child instanceof ViewGroup) {
                 if (child instanceof IJKVideoView) {
                     ViewGroup.LayoutParams params = child.getLayoutParams();
-                    if (orientation==Orientation.LANDSCAPE && portraitWidth == -3) {
+                    if (orientation == Orientation.LANDSCAPE && portraitWidth == -3) {
                         portraitWidth = params.width;
                         portraitHeight = params.height;
                     }
-                    params.width = orientation==Orientation.LANDSCAPE ? FrameLayout.LayoutParams.MATCH_PARENT : portraitWidth;
-                    params.height = orientation==Orientation.LANDSCAPE ? FrameLayout.LayoutParams.MATCH_PARENT : portraitHeight;
+                    params.width = orientation == Orientation.LANDSCAPE ? FrameLayout.LayoutParams.MATCH_PARENT : portraitWidth;
+                    params.height = orientation == Orientation.LANDSCAPE ? FrameLayout.LayoutParams.MATCH_PARENT : portraitHeight;
                     child.setLayoutParams(params);
-                    Log.i(TAG, "->child instanceof IJKVideoView portrait params width=" + portraitWidth + ",height=" + portraitHeight);
+                    if (debug) {
+                        Log.d(TAG, "child instanceof IJKVideoView portrait params width=" + portraitWidth + ",height=" + portraitHeight);
+                    }
                 } else {
                     switchSettingViews((ViewGroup) child, orientation);
                 }
             } else {
-                child.setVisibility(orientation==Orientation.LANDSCAPE ? View.GONE : View.VISIBLE);
+                child.setVisibility(orientation == Orientation.LANDSCAPE ? View.GONE : View.VISIBLE);
             }
         }
     }
@@ -200,7 +200,7 @@ public class IJKHelper {
      * @param context 上下文
      * @return
      */
-    public float currentBrightness(Context context) {
+    public float getCurrentBrightness(Context context) {
         Activity activity = (Activity) context;
         if (activity == null) {
             return 0.0f;
@@ -208,13 +208,6 @@ public class IJKHelper {
         Window window = activity.getWindow();
         WindowManager.LayoutParams lp = window.getAttributes();
         float brightness = lp.screenBrightness;
-        if (brightness == 0.0F || brightness == 1.0F) {
-            try {
-                brightness = Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS) / 255.0F;
-            } catch (Settings.SettingNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
         return brightness;
     }
 
@@ -235,18 +228,26 @@ public class IJKHelper {
     }
 
     /**
+     * 获取音量控制
+     *
+     * @param context 上下文
+     * @return
+     */
+    public AudioManager getAudioManager(Context context) {
+        if (audioManager == null) {
+            audioManager = (AudioManager) context.getSystemService(Service.AUDIO_SERVICE);
+        }
+        return audioManager;
+    }
+
+    /**
      * 当前音量值
      *
      * @param context 上下文对象
      * @return
      */
-    public float currentVoice(Context context) {
-        if (currentVoice != 0) {
-            return currentVoice;
-        }
-        AudioManager audioManager = (AudioManager) context.getSystemService(Service.AUDIO_SERVICE);
-        currentVoice = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-        return currentVoice;
+    public int getCurrentVoice(Context context) {
+        return getAudioManager(context).getStreamVolume(AudioManager.STREAM_MUSIC);
     }
 
     /**
@@ -255,9 +256,8 @@ public class IJKHelper {
      * @param context
      * @return
      */
-    public float maxVoice(Context context) {
-        AudioManager audioManager = (AudioManager) context.getSystemService(Service.AUDIO_SERVICE);
-        return audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+    public int getMaxVoice(Context context) {
+        return getAudioManager(context).getStreamMaxVolume(AudioManager.STREAM_MUSIC);
     }
 
     /**
@@ -265,10 +265,8 @@ public class IJKHelper {
      *
      * @param voiceValue 0-1
      */
-    public void changeVoice(Context context, float voiceValue) {
-        currentVoice = voiceValue;
-        AudioManager audioManager = (AudioManager) context.getSystemService(Service.AUDIO_SERVICE);
-        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (int) voiceValue, AudioManager.FLAG_PLAY_SOUND);
+    public void changeVoice(Context context, int voiceValue) {
+        getAudioManager(context).setStreamVolume(AudioManager.STREAM_MUSIC, (int) voiceValue, AudioManager.FLAG_PLAY_SOUND);
     }
 
     /**
@@ -286,70 +284,111 @@ public class IJKHelper {
     public boolean onTouchEvent(Context context, boolean isLiveSource, MotionEvent event, View view, long current, long duration, OnIjkVideoTouchListener listener) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.i(TAG, "->onTouchEvent ACTION_DOWN");
-                downX = event.getRawX();
+                downX = event.getX();
                 downY = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (listener != null) {
                     listener.onVideoControlViewShow(event);
                 }
-                float distanceXValue = event.getX() - downX;
-                float distanceYValue = event.getY() - downY;
-                float distanceX = Math.abs(distanceXValue);
-                float distanceY = Math.abs(distanceYValue);
-                float tan = distanceY / distanceX;
+                float deltaX = event.getX() - downX;
+                float deltaY = event.getY() - downY;
+                float absDeltaX = Math.abs(deltaX);
+                float absDeltaY = Math.abs(deltaY);
                 float width = view.getMeasuredWidth();
                 float height = view.getMeasuredHeight();
-                if (tan <= 1) {
-                    if (!isLiveSource) {
-                        if (distanceX < distanceLimit) {
-                            break;
-                        }
-                        isChangeVideoProgress = true;
-                        float horizontalPercent = distanceX / width;
-                        position = (long) increaseDecreaseValue(distanceXValue, horizontalPercent, current, duration, 0, 1f, Orientation.LANDSCAPE);
-                        Log.i(TAG, "->onTouchEvent ACTION_MOVE Horizontal percent:" + (position * 1.0f / duration) + ",duration:" + duration + ",current:" + current + ",position:" + position);
-                        if (listener != null) {
-                            listener.onVideoStartChangeProgress(position, position * 1.0f / duration);
-                        }
+                //向量角度
+                double angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+                boolean isHorizontalAngle = (angle > -45 && angle < 45) || (angle > -180 && angle < -135) || (angle > 135 && angle < 180);
+                if (absDeltaX > 50 && absDeltaX > absDeltaY && isHorizontalAngle && isLiveSource == false) {
+                    float horizontalPercent = deltaX / width;
+                    if (currentProgress == -1) {
+                        currentProgress = current;
                     }
-                } else {
-                    float verticalPercent = distanceY / height;
+                    long deltaProgress = (long) (duration * horizontalPercent);
+                    long progress;
+                    //根据手势方向调整音量
+                    if (deltaX < 0) {
+                        //向上滑动增大音量
+                        progress = currentProgress - Math.abs(deltaProgress);
+                        progress = progress < 0 ? 0 : progress;
+                    } else {
+                        //向下滑动减小音量
+                        progress = currentProgress + Math.abs(deltaProgress);
+                        progress = progress > duration ? duration : progress;
+                    }
+                    float progressPercent = progress * 1.0f / duration;
+                    if (debug) {
+                        Log.d(TAG, "deltaX：" + deltaX + ",progress:" + progress + ",duration:" + duration + ",progressPercent:" + progressPercent + ",angle:" + angle);
+                    }
+                    if (listener != null) {
+                        listener.onVideoStartChangeProgress(progress, progressPercent);
+                    }
+                }
+
+                boolean isVerticalAngle = ((angle > -135 && angle < -45) || (angle > 45 && angle < 135));
+                if (absDeltaY > 50 && absDeltaY > absDeltaX && isVerticalAngle) {
+                    float verticalPercent = deltaY / height;
                     //左边右边判断
                     float horizontalMiddleX = view.getMeasuredWidth() / 2;
                     if (downX < horizontalMiddleX) {//左边
-                        if (distanceX < distanceLimit) {
-                            break;
-                        }
                         //当前亮度值
-                        float brightness = increaseDecreaseValue(distanceYValue, verticalPercent, currentBrightness(context), 1f, 0f, 0.02f, Orientation.PORTRAIT);
-                        Log.i(TAG, "->onTouchEvent ACTION_MOVE Vertical Left percent:" + (brightness / 1f) + ",brightness：" + brightness);
+                        if (currentBrightness == -1) {
+                            currentBrightness = getCurrentBrightness(context);
+                        }
+                        float deltaBrightness = verticalPercent;
+                        float brightness;
+                        //根据手势方向调整音量
+                        if (deltaY < 0) {
+                            //向上滑动增大音量
+                            brightness = currentBrightness + Math.abs(deltaBrightness);
+                            brightness = brightness > 1f ? 1f : brightness;
+                        } else {
+                            //向下滑动减小音量
+                            brightness = currentBrightness - Math.abs(deltaBrightness);
+                            brightness = brightness < 0 ? 0 : brightness;
+                        }
+                        if (debug) {
+                            Log.d(TAG, "brightness:" + brightness + ",brightnessPercent:" + brightness + ",verticalPercent:" + verticalPercent + ",angle:" + angle);
+                        }
                         if (listener != null) {
-                            listener.onVideoChangeBrightness(brightness, brightness / 1f);
+                            listener.onVideoChangeBrightness(brightness, brightness);
                         }
                     } else {//右边
-                        if (distanceX < distanceLimit) {
-                            break;
+                        //根据 deltaY 的值来调整音量，可以根据具体需求进行调整
+                        if (maxVolume == -1) {
+                            maxVolume = getMaxVoice(context);
                         }
-                        float currentVoice = currentVoice(context);
-                        float maxVoice = maxVoice(context);
-                        Log.i(TAG, "->onTouchEvent ACTION_MOVE Vertical Right currentVoice:" + currentVoice + ",maxVoice：" + maxVoice);
-                        //当前亮度值
-                        float voice = increaseDecreaseValue(distanceYValue, verticalPercent, currentVoice, maxVoice, 0, 0.02f, Orientation.PORTRAIT);
-                        Log.i(TAG, "->onTouchEvent ACTION_MOVE Vertical Right percent:" + verticalPercent + ",voice：" + voice);
+                        if (currentVolume == -1) {
+                            currentVolume = getCurrentVoice(view.getContext());
+                        }
+                        //计算调整音量的大小
+                        int deltaVolume = (int) (maxVolume * verticalPercent);
+                        int volume;
+                        //根据手势方向调整音量
+                        if (deltaY < 0) {
+                            //向上滑动增大音量
+                            volume = currentVolume + Math.abs(deltaVolume);
+                            volume = volume > maxVolume ? maxVolume : volume;
+                        } else {
+                            //向下滑动减小音量
+                            volume = currentVolume - Math.abs(deltaVolume);
+                            volume = volume < 0 ? 0 : volume;
+                        }
+                        float volumePercent = volume * 1F / maxVolume;
+                        if (debug) {
+                            Log.d(TAG, "maxVolume:" + maxVolume + ",volume:" + volume + ",volumePercent:" + volumePercent + ",verticalPercent:" + verticalPercent);
+                        }
                         if (listener != null) {
-                            listener.onVideoChangeVoice(voice, voice / maxVoice);
+                            listener.onVideoChangeVoice(volume, volume * 1F / maxVolume);
                         }
                     }
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                Log.i(TAG, "->onTouchEvent ACTION_UP");
-                if (listener != null && isChangeVideoProgress) {
-                    listener.onVideoStopChangeProgress(position, position * 1.0f / duration);
-                    isChangeVideoProgress = false;
-                }
+                currentProgress = -1;
+                currentVolume = -1;
+                currentBrightness = -1;
                 if (listener != null) {
                     listener.onVideoControlViewHide(event);
                 }
@@ -358,39 +397,4 @@ public class IJKHelper {
         return true;
     }
 
-    /**
-     * 增减值处理
-     *
-     * @param distanceValue   移动终点 - 起点的值
-     * @param verticalPercent 竖向移动百分比
-     * @param currentValue    当前值
-     * @param maxValue        最大值
-     * @param minValue        最小值
-     * @param coefficient     系数值
-     * @param orientation     滑动方向
-     * @return
-     */
-    public float increaseDecreaseValue(float distanceValue, float verticalPercent, float currentValue, float maxValue, float minValue, float coefficient, Orientation orientation) {
-        if (orientation == Orientation.PORTRAIT) {
-            if (distanceValue > 0) {//向下滑动
-                currentValue -= verticalPercent * maxValue * coefficient;
-            } else {//向上滑动
-                currentValue += verticalPercent * maxValue * coefficient;
-            }
-        }
-        if (orientation == Orientation.LANDSCAPE) {
-            if (distanceValue > 0) {//向右滑动
-                currentValue += verticalPercent * maxValue * coefficient;
-            } else {//向左滑动
-                currentValue -= verticalPercent * maxValue * coefficient;
-            }
-        }
-        if (currentValue > maxValue) {
-            currentValue = maxValue;
-        }
-        if (currentValue < minValue) {
-            currentValue = minValue;
-        }
-        return currentValue;
-    }
 }

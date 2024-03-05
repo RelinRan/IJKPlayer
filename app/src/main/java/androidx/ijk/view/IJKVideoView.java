@@ -28,7 +28,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-
 import androidx.ijk.IJK;
 import androidx.ijk.IJKOption;
 import androidx.ijk.R;
@@ -197,6 +196,15 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     }
 
     /**
+     * 播放操作助手
+     *
+     * @return
+     */
+    public IJKHelper getIjkHelper() {
+        return ijkHelper;
+    }
+
+    /**
      * 初始化媒体对象
      */
     public void initMediaPlayer() {
@@ -299,13 +307,14 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
             } else {
                 orientation = Orientation.PORTRAIT;
             }
-            ijkHelper.switchScreen(getContext(), this, orientation);
+            //如果用户自己想操作屏幕的缩放，就使用此方法就行了
             if (onIJKVideoSwitchScreenListener != null) {
                 onIJKVideoSwitchScreenListener.onIJKVideoSwitchScreen(orientation);
+            } else {
+                ijkHelper.switchScreen(getContext(), this, orientation);
             }
         }
     }
-
 
     //************************************[SeekBar监听]**************************************
     @Override
@@ -724,7 +733,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         if (isLiveSource()) {
             liveStartTime = System.currentTimeMillis();
         }
-        if (surface!=null){
+        if (surface != null) {
             iMediaPlayer.setSurface(surface);
         }
         Log.i(TAG, "onPrepared");
@@ -937,22 +946,6 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         controlViewHolder.getLoadingView().setVisibility(GONE);
     }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                Log.i(TAG, "onInterceptTouchEvent ACTION_DOWN");
-                break;
-            case MotionEvent.ACTION_MOVE:
-                Log.i(TAG, "onInterceptTouchEvent ACTION_MOVE");
-                break;
-            case MotionEvent.ACTION_UP:
-                Log.i(TAG, "onInterceptTouchEvent ACTION_UP");
-                break;
-        }
-        return super.onInterceptTouchEvent(ev);
-    }
-
     //*******************************[onTouchEvent]*********************************
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -966,7 +959,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     }
 
     @Override
-    public void onVideoChangeVoice(float value, float percent) {
+    public void onVideoChangeVoice(int value, float percent) {
         ijkHelper.changeVoice(getContext(), value);
         showCircleProgressPercent(percent, ProgressType.VOICE);
     }

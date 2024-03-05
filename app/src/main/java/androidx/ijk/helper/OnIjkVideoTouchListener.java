@@ -23,7 +23,7 @@ public interface OnIjkVideoTouchListener {
      * @param value   音量值
      * @param percent 音量百分比[0-1]
      */
-    void onVideoChangeVoice(float value, float percent);
+    void onVideoChangeVoice(int value, float percent);
 
     /**
      * 改变进度开始
