@@ -3,6 +3,7 @@ package androidx.ijk.view;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -28,6 +29,10 @@ public class IJKControlViewHolder {
      * 播放/暂停
      */
     private ImageView iv_ijk_play;
+    /**
+     * 底部控制栏
+     */
+    private LinearLayout group_bottom;
     /**
      * 当前时间
      */
@@ -75,6 +80,7 @@ public class IJKControlViewHolder {
      * 找到所有控件
      */
     public void findViews() {
+        group_bottom = controlView.findViewById(R.id.group_bottom);
         iv_ijk_play = controlView.findViewById(R.id.iv_ijk_play);
         tv_ijk_current = controlView.findViewById(R.id.tv_ijk_current);
         seek_ijk_bar = controlView.findViewById(R.id.seek_ijk_bar);
@@ -103,6 +109,14 @@ public class IJKControlViewHolder {
      */
     public View getControlView() {
         return controlView;
+    }
+
+    /**
+     * 获取底部控制栏
+     * @return
+     */
+    public LinearLayout getGroupBottom() {
+        return group_bottom;
     }
 
     /**

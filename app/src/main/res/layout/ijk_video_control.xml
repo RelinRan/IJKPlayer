@@ -13,6 +13,7 @@
         android:scaleType="fitXY"></ImageView>
 
     <LinearLayout
+        android:id="@+id/group_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
@@ -80,7 +81,7 @@
         app:ijkProgressStrokeWidth="@dimen/ijk_voice_brightness_stroke_width"
         app:ijkProgressText="音"
         app:ijkProgressTextColor="@color/ijk_voice_brightness_text_color"
-        app:ijkProgressTextSize="10sp"></androidx.ijk.view.IJKCircleProgressView>
+        app:ijkProgressTextSize="12sp"></androidx.ijk.view.IJKCircleProgressView>
 
     <FrameLayout
         android:id="@+id/fl_ijk_loading"

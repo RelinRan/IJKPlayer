@@ -54,4 +54,24 @@ public interface OnIjkVideoTouchListener {
      * @param event 事件对象
      */
     void onVideoControlViewHide(MotionEvent event);
+
+    /**
+     * 按下
+     * @param event
+     */
+    void onVideoActionDown(MotionEvent event);
+
+    /**
+     * 移动
+     * @param event
+     */
+    void onVideoActionMove(MotionEvent event);
+
+    /**
+     * 释放
+     * @param event
+     */
+    void onVideoActionUp(MotionEvent event);
+
+
 }

@@ -946,6 +946,22 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         controlViewHolder.getLoadingView().setVisibility(GONE);
     }
 
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+//        switch (ev.getAction()) {
+//            case MotionEvent.ACTION_DOWN:
+//                Log.i(TAG, "onInterceptTouchEvent ACTION_DOWN");
+//                break;
+//            case MotionEvent.ACTION_MOVE:
+//                Log.i(TAG, "onInterceptTouchEvent ACTION_MOVE");
+//                break;
+//            case MotionEvent.ACTION_UP:
+//                Log.i(TAG, "onInterceptTouchEvent ACTION_UP");
+//                break;
+//        }
+        return super.onInterceptTouchEvent(ev);
+    }
+
     //*******************************[onTouchEvent]*********************************
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -986,6 +1002,31 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     @Override
     public void onVideoControlViewHide(MotionEvent event) {
         controlViewHolder.getVoiceLightProgressView().setVisibility(GONE);
+    }
+
+    @Override
+    public void onVideoActionDown(MotionEvent event) {
+        if (onClickListener!=null){
+            onClickListener.onClick(this);
+        }
+    }
+
+    @Override
+    public void onVideoActionMove(MotionEvent event) {
+
+    }
+
+    @Override
+    public void onVideoActionUp(MotionEvent event) {
+
+    }
+
+
+    private OnClickListener onClickListener;
+    @Override
+    public void setOnClickListener(@Nullable OnClickListener l) {
+        super.setOnClickListener(l);
+        onClickListener = l;
     }
 
     public enum ProgressType {

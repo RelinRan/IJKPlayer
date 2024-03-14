@@ -286,6 +286,9 @@ public class IJKHelper {
             case MotionEvent.ACTION_DOWN:
                 downX = event.getX();
                 downY = event.getY();
+                if (listener != null) {
+                    listener.onVideoActionDown(event);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (listener != null) {
@@ -325,7 +328,6 @@ public class IJKHelper {
                         listener.onVideoStartChangeProgress(progress, progressPercent);
                     }
                 }
-
                 boolean isVerticalAngle = ((angle > -135 && angle < -45) || (angle > 45 && angle < 135));
                 if (absDeltaY > 50 && absDeltaY > absDeltaX && isVerticalAngle) {
                     float verticalPercent = deltaY / height;
@@ -384,6 +386,9 @@ public class IJKHelper {
                         }
                     }
                 }
+                if (listener != null) {
+                    listener.onVideoActionMove(event);
+                }
                 break;
             case MotionEvent.ACTION_UP:
                 currentProgress = -1;
@@ -391,6 +396,9 @@ public class IJKHelper {
                 currentBrightness = -1;
                 if (listener != null) {
                     listener.onVideoControlViewHide(event);
+                }
+                if (listener != null) {
+                    listener.onVideoActionUp(event);
                 }
                 break;
         }
