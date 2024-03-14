@@ -117,28 +117,36 @@ path.xml
 ```
 //初始化建议配置在Application
 IJK ijk = IJK.config();
+//ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "rtsp_transport", "tcp");
 //启用硬解码器
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 1);
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 1);
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
 //启用硬解码器（如果设备支持）
-//ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "videotoolbox", 1);
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "videotoolbox", 1);
 //设置探测缓冲区大小
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "probesize", 1024 * 10);
-//设置最小缓冲帧数
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "min-frames", 100);
 //设置最大缓冲区大小（默认是0，表示无限制）
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-buffer-size", 0);
 //设置最小缓冲帧数
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "min-frames", 5);
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "min-frames", 100);
+//设置最大缓存时长
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max_cached_duration", 5000);
+//设置启动时的探测时间（毫秒）
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "analyzeduration", 100L);
+//设置分析最大时长（毫秒）
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "analyzemaxduration", 100L);
+//启用无限缓冲模式
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "infbuf", 1);
+//启用数据包缓冲
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 0L);
+//设置帧率为30
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "fps", 30);
+//设置禁用缓冲
+//ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "nobuffer");
 //设置超时时间
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "timeout", 10000);
-//设置启动时的探测时间
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "analyzeduration", 100L);
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "analyzemaxduration", 100L);
-//关闭播放缓冲区
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 0L);
 //立刻写出处理完的Packet
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "flush_packets", 1L);
 //允许丢帧
@@ -147,7 +155,12 @@ ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1L);
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 1L);
 //优化进度跳转
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1);
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "fastseek");
+//清除DNS缓存（为了提高域名解析的效率）
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "dns_cache_clear", 1);
+//自动重新连接
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "reconnect", 1);
+//启用了SoundTouch库（对音频的实时变速、变调等效果）
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "soundtouch", 1);
 ```
 #### 播放视频
 ```
