@@ -540,6 +540,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     public void prepareAsync() {
         isPlayEnd = false;
         isPrepared = false;
+        controlViewHolder.getCenterImageView().setVisibility(GONE);
         mediaPlayer.prepareAsync();
     }
 

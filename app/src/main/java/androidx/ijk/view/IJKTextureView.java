@@ -129,12 +129,12 @@ public class IJKTextureView extends TextureView {
                     parentWidth = parentHeight;
                     parentHeight = tempSize;
                 }
-                if (((double) videoHeight / videoWidth) > ((double) parentHeight / parentWidth)) {
-                    height = (int) (((double) parentWidth / (double) width * (double) height));
-                    width = parentWidth;
-                } else if (((double) videoHeight / videoWidth) < ((double) parentHeight / parentWidth)) {
+                if (parentWidth > parentHeight) {
                     width = (int) (((double) parentHeight / (double) height * (double) width));
                     height = parentHeight;
+                } else if (parentWidth < parentHeight) {
+                    height = (int) (((double) parentWidth / (double) width * (double) height));
+                    width = parentWidth;
                 }
             }
         }
