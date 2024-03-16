@@ -5,12 +5,16 @@ IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 1.更新编译为ff4.0--ijk0.8.8--20210426--001版本;  
 2.Android 11以上高版本报错问题;  
 3.音量、光亮、进度调节逻辑修改;  
+4.支持音频解析pcm、amr、nellymoser、flac、ogg、wav、matroska
 
 #### FIX - 2024.3.12.1
-4.重新编译so,支持播放rtmp、rtsp协议
+1.重新编译so,支持播放rtmp、rtsp协议
+
+##### FIX-2023.3.16.1
+1.支持音频解析pcm、amr、nellymoser、flac、ogg、wav、matroska
 
 #### [AAR]
-[ijk-2024.3.12.1.aar](https://github.com/RelinRan/IJKPlayer/blob/master/ijk-2024.3.12.1.aar)
+[ijk-2024.3.16.1.aar](https://github.com/RelinRan/IJKPlayer/blob/master/ijk-2024.3.16.1.aar)
 ```
 android {
     ....
@@ -117,43 +121,46 @@ path.xml
 ```
 //初始化建议配置在Application
 IJK ijk = IJK.config();
-//ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "rtsp_transport", "tcp");
-//启用硬解码器
+ijk.displayType(IJK.DISPLAY_MATCH_CROP);
+//使用硬解码器解码
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
+//自动旋转视频画面
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 1);
+//处理分辨率变化
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 1);
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
-//启用硬解码器（如果设备支持）
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "videotoolbox", 1);
+//配置OpenSL ES音频输出
+//ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
 //设置探测缓冲区大小
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "probesize", 1024 * 10);
+//ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "probesize", 10240L);
 //设置最大缓冲区大小（默认是0，表示无限制）
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-buffer-size", 0);
 //设置最小缓冲帧数
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "min-frames", 100);
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "min-frames", 60);
 //设置最大缓存时长
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max_cached_duration", 5000);
 //设置启动时的探测时间（毫秒）
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "analyzeduration", 100L);
 //设置分析最大时长（毫秒）
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "analyzemaxduration", 100L);
-//启用无限缓冲模式
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "infbuf", 1);
-//启用数据包缓冲
+//强制刷新数据包
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "flush_packets", 1L);
+//禁用数据包缓冲
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 0L);
 //设置帧率为30
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "fps", 30);
-//设置禁用缓冲
-//ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "nobuffer");
 //设置超时时间
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "timeout", 10000);
-//立刻写出处理完的Packet
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "flush_packets", 1L);
-//允许丢帧
+//启用无限缓冲模式
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "infbuf", 1L);
+//启用帧丢弃
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1L);
-//调用prepareAsync()方法后是否自动开始播放
-ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 1L);
-//优化进度跳转
+//跳过环路过滤器（Loop Filter），提高解码性能
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "skip_loop_filter", 48);
+//禁用 HTTP 资源范围检测
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "http-detect-range-support", 0);
+//禁用 HTTPS 资源范围检测
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "https-detect-range-support", 0);
+//启用精确的 seek（定位）
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1);
 //清除DNS缓存（为了提高域名解析的效率）
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "dns_cache_clear", 1);
@@ -161,6 +168,14 @@ ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "dns_cache_clear", 1);
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "reconnect", 1);
 //启用了SoundTouch库（对音频的实时变速、变调等效果）
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "soundtouch", 1);
+//调用prepareAsync()方法后是否自动开始播放
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 1L);
+```
+#### rtmp直播流，刚播放时，画面卡顿几秒，没有声音大概4、5秒后都恢复正常
+不要配置probesize参数
+```
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 0);
+ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "nobuffer");
 ```
 #### 播放视频
 ```

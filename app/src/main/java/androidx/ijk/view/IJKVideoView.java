@@ -485,7 +485,9 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
      * 停止播放
      */
     public void stop() {
-        mediaPlayer.stop();
+        if (mediaPlayer.isPlaying()){
+            mediaPlayer.stop();
+        }
     }
 
     /**
@@ -510,7 +512,9 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         controlViewHolder.getCenterImageView().setVisibility(VISIBLE);
         controlViewHolder.getCenterImageView().setImageResource(R.mipmap.ic_ijk_pause_center);
         controlViewHolder.getPlayView().setImageResource(R.mipmap.ic_ijk_pause_control);
-        mediaPlayer.pause();
+        if (mediaPlayer.isPlaying()){
+            mediaPlayer.pause();
+        }
         stopVideoProgress();
     }
 
@@ -530,7 +534,9 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     public void resume() {
         controlViewHolder.getCenterImageView().setVisibility(GONE);
         controlViewHolder.getPlayView().setImageResource(R.mipmap.ic_ijk_play_control);
-        mediaPlayer.start();
+        if (!mediaPlayer.isPlaying()){
+            mediaPlayer.start();
+        }
         startVideoProgress();
     }
 
