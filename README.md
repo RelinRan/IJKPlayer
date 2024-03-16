@@ -43,7 +43,7 @@ allprojects {
 项目/app/build.grade
 ```
 dependencies {
-	    implementation 'com.github.RelinRan:IJKPlayer:2024.3.12.1'
+	    implementation 'com.github.RelinRan:IJKPlayer:2024.3.16.1'
 	}
 ```
 #### 权限配置
