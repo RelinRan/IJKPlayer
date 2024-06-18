@@ -14,7 +14,9 @@ IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 1.支持音频解析pcm、amr、nellymoser、flac、ogg、wav、matroska
 
 ##### FIX-2023.6.18.1
-1.调整loading显示方式为当前网速
+1.去掉loading显示；
+2.显示实时网速缓冲；
+3.重新编译so文件
 
 #### [AAR]
 [ijk-2024.6.18.1.aar](https://github.com/RelinRan/IJKPlayer/blob/master/ijk-2024.6.18.1.aar)
