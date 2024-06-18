@@ -5,8 +5,8 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.SurfaceTexture;
-import android.graphics.drawable.AnimationDrawable;
 import android.media.AudioManager;
+import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -53,7 +53,7 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
  */
 public class IJKVideoView extends FrameLayout implements TextureView.SurfaceTextureListener, IMediaPlayer.OnInfoListener,
         IMediaPlayer.OnPreparedListener, IMediaPlayer.OnVideoSizeChangedListener, IMediaPlayer.OnCompletionListener,
-        IMediaPlayer.OnErrorListener, IMediaPlayer.OnSeekCompleteListener,
+        IMediaPlayer.OnErrorListener, IMediaPlayer.OnSeekCompleteListener, IMediaPlayer.OnBufferingUpdateListener,
         View.OnClickListener, SeekBar.OnSeekBarChangeListener, OnIjkVideoTouchListener, Cloneable {
 
     private String TAG = IJKVideoView.class.getSimpleName();
@@ -232,6 +232,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         mediaPlayer.setOnCompletionListener(this);
         mediaPlayer.setOnSeekCompleteListener(this);
         mediaPlayer.setOnErrorListener(this);
+        mediaPlayer.setOnBufferingUpdateListener(this);
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoSeekEnable(true);
         }
@@ -485,7 +486,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
      * 停止播放
      */
     public void stop() {
-        if (mediaPlayer.isPlaying()){
+        if (mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
         }
     }
@@ -512,7 +513,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         controlViewHolder.getCenterImageView().setVisibility(VISIBLE);
         controlViewHolder.getCenterImageView().setImageResource(R.mipmap.ic_ijk_pause_center);
         controlViewHolder.getPlayView().setImageResource(R.mipmap.ic_ijk_pause_control);
-        if (mediaPlayer.isPlaying()){
+        if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
         }
         stopVideoProgress();
@@ -534,7 +535,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
     public void resume() {
         controlViewHolder.getCenterImageView().setVisibility(GONE);
         controlViewHolder.getPlayView().setImageResource(R.mipmap.ic_ijk_play_control);
-        if (!mediaPlayer.isPlaying()){
+        if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
         }
         startVideoProgress();
@@ -942,8 +943,6 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
      */
     public void showLoading() {
         controlViewHolder.getLoadingView().setVisibility(VISIBLE);
-        AnimationDrawable drawable = (AnimationDrawable) controlViewHolder.getLoadingImageView().getBackground();
-        drawable.start();
     }
 
     /**
@@ -1013,7 +1012,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
 
     @Override
     public void onVideoActionDown(MotionEvent event) {
-        if (onClickListener!=null){
+        if (onClickListener != null) {
             onClickListener.onClick(this);
         }
     }
@@ -1030,10 +1029,23 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
 
 
     private OnClickListener onClickListener;
+
     @Override
     public void setOnClickListener(@Nullable OnClickListener l) {
         super.setOnClickListener(l);
         onClickListener = l;
+    }
+
+    private long lastTotalRxBytes = 0;
+
+    @Override
+    public void onBufferingUpdate(IMediaPlayer mp, int percent) {
+        long currentTotalRxBytes = TrafficStats.getTotalRxBytes();
+        long bytesPerSecond = currentTotalRxBytes - lastTotalRxBytes;
+        long downloadSpeedMbps = bytesPerSecond / 1024;
+        String speedText = downloadSpeedMbps + "Kbps";
+        controlViewHolder.getLoadingTextView().setText(speedText);
+        lastTotalRxBytes = currentTotalRxBytes;
     }
 
     public enum ProgressType {

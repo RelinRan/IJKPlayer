@@ -3,6 +3,7 @@
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
+
     <!--Seek圆点颜色-->
     <color name="ijk_seek_dot">#DDDDDD</color>
     <!--进度条进度颜色-->
@@ -13,8 +14,12 @@
     <color name="ijk_seek_secondary_progress">#F0F0F1</color>
     <!--声音/亮度背景颜色-->
     <color name="ijk_voice_brightness_background">#80000000</color>
+    <color name="ijk_loading_background">#80000000</color>
     <!--声音/亮度文字颜色-->
     <color name="ijk_voice_brightness_text_color">#FFFFFF</color>
     <!--声音/亮度进度颜色-->
     <color name="ijk_voice_brightness_progress_color">#03DAC5</color>
+    <!--进度文字颜色-->
+    <color name="ijk_loading_text_color">#03DAC5</color>
+    
 </resources>

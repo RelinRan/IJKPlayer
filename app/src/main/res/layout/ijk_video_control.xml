@@ -85,17 +85,24 @@
 
     <FrameLayout
         android:id="@+id/fl_ijk_loading"
-        android:layout_width="@dimen/ijk_loading_width"
-        android:layout_height="@dimen/ijk_loading_height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="@drawable/ijk_voice_brightness_background">
+        android:layout_marginBottom="60dp"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="5dp"
+        android:visibility="visible"
+        android:background="@drawable/ijk_loading_background">
 
-        <ImageView
-            android:id="@+id/iv_ijk_loading"
+        <TextView
+            android:id="@+id/tv_ijk_loading"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="13dp"
-            android:background="@drawable/ijk_anim_loading"></ImageView>
+            android:textSize="14sp"
+            android:text="100Kbps"
+            android:gravity="center"
+            android:textColor="@color/ijk_loading_text_color"/>
+
     </FrameLayout>
 
 </FrameLayout>

@@ -64,7 +64,7 @@ public class IJKControlViewHolder {
     /**
      * ImageView Loading
      */
-    private ImageView iv_ijk_loading;
+    private TextView tv_ijk_loading;
     /**
      * 封面
      */
@@ -89,7 +89,7 @@ public class IJKControlViewHolder {
         iv_ijk_center = controlView.findViewById(R.id.iv_ijk_center);
         ijk_center_progress = controlView.findViewById(R.id.ijk_center_progress);
         fl_ijk_loading = controlView.findViewById(R.id.fl_ijk_loading);
-        iv_ijk_loading = controlView.findViewById(R.id.iv_ijk_loading);
+        tv_ijk_loading = controlView.findViewById(R.id.tv_ijk_loading);
         iv_ijk_cover = controlView.findViewById(R.id.iv_ijk_cover);
     }
 
@@ -192,11 +192,11 @@ public class IJKControlViewHolder {
     }
 
     /**
-     * Loading ImageView
+     * Loading TextView
      * @return
      */
-    public ImageView getLoadingImageView(){
-        return iv_ijk_loading;
+    public TextView getLoadingTextView(){
+        return tv_ijk_loading;
     }
 
     /**
