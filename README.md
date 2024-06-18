@@ -17,7 +17,7 @@ IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 1.调整loading显示方式为当前网速
 
 #### [AAR]
-[ijk-2024.6.18.1.aar](https://github.com/RelinRan/IJKPlayer/blob/master/ijk-2024.3.16.1.aar)
+[ijk-2024.6.18.1.aar](https://github.com/RelinRan/IJKPlayer/blob/master/ijk-2024.6.18.1.aar)
 ```
 android {
     ....
