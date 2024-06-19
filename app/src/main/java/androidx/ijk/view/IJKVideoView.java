@@ -892,6 +892,7 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
                 liveStartTime = liveStartTime == 0 ? System.currentTimeMillis() : liveStartTime;
                 long current = isLiveSource() ? System.currentTimeMillis() - liveStartTime : iMediaPlayer.getCurrentPosition();
                 Log.i(TAG, "onVideoProgress duration=" + duration + ",current=" + current + ",isLiveSource=" + isLiveSource());
+                showSpeed();
                 onVideoProgress(iMediaPlayer, duration, current);
                 if (onIJKVideoListener != null) {
                     onIJKVideoListener.onVideoProgress(iMediaPlayer, iMediaPlayer.getDuration(), iMediaPlayer.getCurrentPosition());
@@ -954,17 +955,6 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-//        switch (ev.getAction()) {
-//            case MotionEvent.ACTION_DOWN:
-//                Log.i(TAG, "onInterceptTouchEvent ACTION_DOWN");
-//                break;
-//            case MotionEvent.ACTION_MOVE:
-//                Log.i(TAG, "onInterceptTouchEvent ACTION_MOVE");
-//                break;
-//            case MotionEvent.ACTION_UP:
-//                Log.i(TAG, "onInterceptTouchEvent ACTION_UP");
-//                break;
-//        }
         return super.onInterceptTouchEvent(ev);
     }
 
@@ -1036,16 +1026,39 @@ public class IJKVideoView extends FrameLayout implements TextureView.SurfaceText
         onClickListener = l;
     }
 
-    private long lastTotalRxBytes = 0;
+    private long lastRxBytes = 0;
+    private long lastRxTime = 0;
+
+    /**
+     * 显示网速
+     */
+    private void showSpeed() {
+        if (controlViewHolder.getLoadingTextView().getVisibility() == View.VISIBLE) {
+            long totalRxBytes = TrafficStats.getTotalRxBytes();
+            if (lastRxBytes == 0) {
+                lastRxBytes = totalRxBytes;
+            }
+            long rxBytes = totalRxBytes - lastRxBytes;
+            long time = System.currentTimeMillis();
+            long rxTime = time - lastRxTime;
+            long speed = rxBytes * 1000 / rxTime;
+            String speedText;
+            if (speed >= 1073741824) {
+                speedText = speed / 1073741824 + "Gbps";
+            } else if (speed >= 1048576) {
+                speedText = speed / 1048576 + "Mbps";
+            } else {
+                speedText = speed / 1024 + "Kbps";
+            }
+            controlViewHolder.getLoadingTextView().setText(speedText);
+            lastRxBytes = totalRxBytes;
+            lastRxTime = time;
+        }
+    }
 
     @Override
     public void onBufferingUpdate(IMediaPlayer mp, int percent) {
-        long currentTotalRxBytes = TrafficStats.getTotalRxBytes();
-        long bytesPerSecond = currentTotalRxBytes - lastTotalRxBytes;
-        long downloadSpeedMbps = bytesPerSecond / 1024;
-        String speedText = downloadSpeedMbps + "Kbps";
-        controlViewHolder.getLoadingTextView().setText(speedText);
-        lastTotalRxBytes = currentTotalRxBytes;
+
     }
 
     public enum ProgressType {

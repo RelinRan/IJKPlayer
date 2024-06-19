@@ -19,7 +19,7 @@ IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 3.重新编译so文件
 
 #### [AAR]
-[ijk-2024.6.18.1.aar](https://github.com/RelinRan/IJKPlayer/blob/master/ijk-2024.6.18.1.aar)
+[ijk-2024.6.19.1.aar](https://github.com/RelinRan/IJKPlayer/blob/master/ijk-2024.6.18.1.aar)
 ```
 android {
     ....
@@ -48,7 +48,7 @@ allprojects {
 项目/app/build.grade
 ```
 dependencies {
-	    implementation 'com.github.RelinRan:IJKPlayer:2024.3.16.1'
+	    implementation 'com.github.RelinRan:IJKPlayer:2024.6.19.1'
 	}
 ```
 #### 权限配置
