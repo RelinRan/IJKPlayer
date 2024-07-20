@@ -198,55 +198,55 @@ if (TextUtils.isEmpty(source)) {
 
 #### 颜色配置
 ```
-    <!--缓冲速度文字颜色-->
-    <color name="ijk_speed_text_color">#03DAC5</color>
-    <!--缓冲速度背景颜色-->
-    <color name="ijk_speed_background">#80000000</color>
-    <!--Seek圆点颜色-->
-    <color name="ijk_seek_dot">#DDDDDD</color>
-    <!--进度条进度颜色-->
-    <color name="ijk_seek_progress">#03DAC5</color>
-    <!--进度条背景颜色-->
-    <color name="ijk_seek_background">#E8E8E9</color>
-    <!--进度条缓冲进度颜色-->
-    <color name="ijk_seek_secondary_progress">#F0F0F1</color>
-    <!--声音/亮度背景颜色-->
-    <color name="ijk_voice_brightness_background">#80000000</color>
-    <!--声音/亮度文字颜色-->
-    <color name="ijk_circle_progress_text_color">#03DAC5</color>
-    <!--声音/亮度进度颜色-->
-    <color name="ijk_circle_progress_color">#03DAC5</color>
+<!--缓冲速度文字颜色-->
+<color name="ijk_speed_text_color">#03DAC5</color>
+<!--缓冲速度背景颜色-->
+<color name="ijk_speed_background">#80000000</color>
+<!--Seek圆点颜色-->
+<color name="ijk_seek_dot">#DDDDDD</color>
+<!--进度条进度颜色-->
+<color name="ijk_seek_progress">#03DAC5</color>
+<!--进度条背景颜色-->
+<color name="ijk_seek_background">#E8E8E9</color>
+<!--进度条缓冲进度颜色-->
+<color name="ijk_seek_secondary_progress">#F0F0F1</color>
+<!--声音/亮度背景颜色-->
+<color name="ijk_voice_brightness_background">#80000000</color>
+<!--声音/亮度文字颜色-->
+<color name="ijk_circle_progress_text_color">#03DAC5</color>
+<!--声音/亮度进度颜色-->
+<color name="ijk_circle_progress_color">#03DAC5</color>
 ```
 #### 尺寸配置
 ```
-    <!--缓冲速度文字大小-->
-    <dimen name="ijk_speed_text_size">14sp</dimen>
-    <!--音量亮度组合宽度-->
-    <dimen name="ijk_voice_brightness_width">65dp</dimen>
-    <!--音量亮度组合高度-->
-    <dimen name="ijk_voice_brightness_height">65dp</dimen>
-    <!--圆圈进度间距-->
-    <dimen name="ijk_circle_progress_margin">8dp</dimen>
-    <!--圆圈进度线条宽度-->
-    <dimen name="ijk_circle_progress_stroke_width">4dp</dimen>
-    <!--圆圈进度文字大小-->
-    <dimen name="ijk_circle_progress_text_size">13sp</dimen>
-    <!--音量图标宽度-->
-    <dimen name="ijk_voice_width">20dp</dimen>
-    <!--音量图标高度-->
-    <dimen name="ijk_voice_height">15dp</dimen>
-    <!--音量图标线条宽度-->
-    <dimen name="ijk_voice_stroke_width">1dp</dimen>
-    <!--亮度图标宽度-->
-    <dimen name="ijk_brightness_width">20dp</dimen>
-    <!--亮度图标高度-->
-    <dimen name="ijk_brightness_height">20dp</dimen>
-    <!--亮度图标圆圈和线条间距-->
-    <dimen name="ijk_brightness_gap">3dp</dimen>
-    <!--亮度图标线条宽度-->
-    <dimen name="ijk_brightness_line_width">2dp</dimen>
-    <!--亮度图标线条长度-->
-    <dimen name="ijk_brightness_line_length">2dp</dimen>
-    <!--亮度图标圆圈半径-->
-    <dimen name="ijk_brightness_radius">4dp</dimen>
+<!--缓冲速度文字大小-->
+<dimen name="ijk_speed_text_size">14sp</dimen>
+<!--音量亮度组合宽度-->
+<dimen name="ijk_voice_brightness_width">65dp</dimen>
+<!--音量亮度组合高度-->
+<dimen name="ijk_voice_brightness_height">65dp</dimen>
+<!--圆圈进度间距-->
+<dimen name="ijk_circle_progress_margin">8dp</dimen>
+<!--圆圈进度线条宽度-->
+<dimen name="ijk_circle_progress_stroke_width">4dp</dimen>
+<!--圆圈进度文字大小-->
+<dimen name="ijk_circle_progress_text_size">13sp</dimen>
+<!--音量图标宽度-->
+<dimen name="ijk_voice_width">20dp</dimen>
+<!--音量图标高度-->
+<dimen name="ijk_voice_height">15dp</dimen>
+<!--音量图标线条宽度-->
+<dimen name="ijk_voice_stroke_width">1dp</dimen>
+<!--亮度图标宽度-->
+<dimen name="ijk_brightness_width">20dp</dimen>
+<!--亮度图标高度-->
+<dimen name="ijk_brightness_height">20dp</dimen>
+<!--亮度图标圆圈和线条间距-->
+<dimen name="ijk_brightness_gap">3dp</dimen>
+<!--亮度图标线条宽度-->
+<dimen name="ijk_brightness_line_width">2dp</dimen>
+<!--亮度图标线条长度-->
+<dimen name="ijk_brightness_line_length">2dp</dimen>
+<!--亮度图标圆圈半径-->
+<dimen name="ijk_brightness_radius">4dp</dimen>
 ```
