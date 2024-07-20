@@ -17,7 +17,7 @@ IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 8.增加手势滑动视频进度改变，同时中间显示滑动百分比显示  
 
 #### [AAR]
-[ijk.aar](https://github.com/RelinRan/IJKPlayer/blob/master/aar)
+[aar文件](https://github.com/RelinRan/IJKPlayer/blob/master/aar)
 ```
 android {
     ....
