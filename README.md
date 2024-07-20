@@ -2,9 +2,9 @@
 IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 
 #### 效果图标
-![视频亮度](https://github.com/RelinRan/IJKPlayer/blob/master/ic_brightness.png)
-![视频音量](https://github.com/RelinRan/IJKPlayer/blob/master/ic_voice.png)
-![视频进度](https://github.com/RelinRan/IJKPlayer/blob/master/ic_progress.png)
+![视频亮度](https://github.com/RelinRan/IJKPlayer/blob/master/ic_brightness.png)  
+![视频音量](https://github.com/RelinRan/IJKPlayer/blob/master/ic_voice.png)  
+![视频进度](https://github.com/RelinRan/IJKPlayer/blob/master/ic_progress.png)  
 
 #### FIX - 2024.7.20.1
 1.更新编译为ff4.0--ijk0.8.8--20210426--001版本;  
