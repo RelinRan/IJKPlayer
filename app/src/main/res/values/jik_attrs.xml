@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--图标颜色-->
+    <attr name="ijkSolid" format="color|reference" />
+    <!--圆角大小-->
+    <attr name="ijkRadius" format="dimension|reference" />
+    <!--线条长度-->
+    <attr name="ijkLineLength" format="dimension|reference" />
+    <!--线条和圆圈间距-->
+    <attr name="ijkGap" format="dimension|reference" />
+    <!--线条宽度-->
+    <attr name="ijkLineWidth" format="dimension|reference" />
+    <!--喇叭底座宽度-->
+    <attr name="ijkCornerWidth" format="dimension|reference" />
+    <!--喇叭底座高度-->
+    <attr name="ijkCornerHeight" format="dimension|reference" />
+    <!--音量线条宽度-->
+    <attr name="ijkStrokeWidth" format="dimension|reference" />
+    <!--音量线条角度-->
+    <attr name="ijkAngle" format="integer|reference" />
+    <!--音量线条数量-->
+    <attr name="ijkCount" format="integer|reference" />
+    <!--喇叭底座X-->
+    <attr name="ijkLeftCenterX" format="integer|reference" />
+    <!--进度值-->
+    <attr name="ijkProgress" format="integer|reference" />
+    <!--进度最大值-->
+    <attr name="ijkMax" format="integer|reference" />
+    <!--进度颜色-->
+    <attr name="ijkProgressColor" format="color|reference" />
+    <!--进度文字-->
+    <attr name="ijkProgressText" format="string|reference" />
+    <!--进度文字-->
+    <attr name="ijkProgressTextSize" format="dimension|reference" />
+    <!--进度文字颜色-->
+    <attr name="ijkProgressTextColor" format="color|reference" />
+    <!--进度背景色-->
+    <attr name="ijkProgressBackgroundColor" format="color|reference" />
+    <!--进度开始角度 0-360-->
+    <attr name="ijkProgressStartAngle" format="float|reference" />
+    <!--圆圈线宽度-->
+    <attr name="ijkProgressStrokeWidth" format="dimension|reference" />
+    <!--圆圈半径-->
+    <attr name="ijkProgressRadius" format="dimension|reference" />
+    <!--圆圈进度-->
+    <declare-styleable name="VideoCircleProgress">
+        <!--进度值-->
+        <attr name="ijkProgress" />
+        <!--进度最大值-->
+        <attr name="ijkMax" />
+        <!--进度颜色-->
+        <attr name="ijkProgressColor" />
+        <!--进度文字-->
+        <attr name="ijkProgressTextVisibility" format="enum">
+            <enum name="visible" value="0"></enum>
+            <enum name="invisible" value="4"></enum>
+        </attr>
+        <!--进度文字-->
+        <attr name="ijkProgressText" />
+        <!--进度文字-->
+        <attr name="ijkProgressTextSize" />
+        <!--进度文字颜色-->
+        <attr name="ijkProgressTextColor" />
+        <!--进度背景色-->
+        <attr name="ijkProgressBackgroundColor" />
+        <!--进度开始角度 0-360-->
+        <attr name="ijkProgressStartAngle" />
+        <!--圆圈线宽度-->
+        <attr name="ijkProgressStrokeWidth" />
+        <!--圆圈半径-->
+        <attr name="ijkProgressRadius" />
+    </declare-styleable>
+    <!--视频音量-->
+    <declare-styleable name="VideoVoice">
+        <!--图标颜色-->
+        <attr name="ijkSolid" />
+        <!--喇叭底座宽度-->
+        <attr name="ijkCornerWidth" />
+        <!--喇叭底座高度-->
+        <attr name="ijkCornerHeight" />
+        <!--音量线条宽度-->
+        <attr name="ijkStrokeWidth" />
+        <!--音量线条角度-->
+        <attr name="ijkAngle" />
+        <!--音量线条数量-->
+        <attr name="ijkCount" />
+        <!--喇叭底座X-->
+        <attr name="ijkLeftCenterX" />
+    </declare-styleable>
+    <!--视频亮度-->
+    <declare-styleable name="VideoBrightness">
+        <!--图标颜色-->
+        <attr name="ijkSolid" />
+        <!--圆角大小-->
+        <attr name="ijkRadius" />
+        <!--线条长度-->
+        <attr name="ijkLineLength" />
+        <!--线条和圆圈间距-->
+        <attr name="ijkGap" />
+        <!--线条宽度-->
+        <attr name="ijkLineWidth" />
+    </declare-styleable>
+</resources>
