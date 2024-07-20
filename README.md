@@ -195,7 +195,6 @@ if (TextUtils.isEmpty(source)) {
     ijk.prepareAsync();
 }
 ```
-
 #### 颜色配置
 ```
 <!--缓冲速度文字颜色-->
