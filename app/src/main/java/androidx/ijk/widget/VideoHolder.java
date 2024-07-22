@@ -1,5 +1,7 @@
 package androidx.ijk.widget;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -7,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.ijk.R;
 
 
@@ -126,8 +129,17 @@ public class VideoHolder {
      *
      * @return
      */
-    public LinearLayout getGroupBottom() {
+    public LinearLayout getControlGroup() {
         return group_bottom;
+    }
+
+    /**
+     * 设置控制组是否可见
+     *
+     * @param show
+     */
+    public void setControlGroupVisibility(boolean show) {
+        getControlGroup().setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -140,6 +152,15 @@ public class VideoHolder {
     }
 
     /**
+     * 设置播放按钮图标资源
+     *
+     * @param resId
+     */
+    public void setPlayImageResource(int resId) {
+        getPlayView().setImageResource(resId);
+    }
+
+    /**
      * 获取当前时间View
      *
      * @return
@@ -149,12 +170,58 @@ public class VideoHolder {
     }
 
     /**
-     * 获取进度条View
+     * 获取拖动bar
      *
      * @return
      */
     public SeekBar getSeekBar() {
         return seek_ijk_bar;
+    }
+
+    /**
+     * 设置拖动bar是否可用
+     *
+     * @param enabled
+     */
+    public void setSeekBarEnabled(boolean enabled) {
+        getSeekBar().setEnabled(enabled);
+    }
+
+    /**
+     * 设置拖动bar按钮图标
+     *
+     * @param context 上下文
+     * @param resId   资源
+     */
+    public void setSeekBarThumb(Context context, int resId) {
+        getSeekBar().setThumb(ContextCompat.getDrawable(context, resId));
+    }
+
+    /**
+     * 设置拖动bar图标
+     *
+     * @param drawable
+     */
+    public void setSeekBarThumb(Drawable drawable) {
+        getSeekBar().setThumb(drawable);
+    }
+
+    /**
+     * 设置拖动bar最大值
+     *
+     * @param max 最大值
+     */
+    public void setSeekBarMax(int max) {
+        getSeekBar().setMax(max);
+    }
+
+    /**
+     * 设置拖动bar进度
+     *
+     * @param progress 进度值
+     */
+    public void setSeekBarProgress(int progress) {
+        getSeekBar().setProgress(progress);
     }
 
     /**
@@ -184,6 +251,21 @@ public class VideoHolder {
         return iv_ijk_center;
     }
 
+    /**
+     * 设置中间图是否可见
+     * @param show
+     */
+    public void setCenterImageVisibility(boolean show){
+        getCenterImageView().setVisibility(show?View.VISIBLE:View.GONE);
+    }
+
+    /**
+     * 设置中间图资源id
+     * @param resId
+     */
+    public void setCenterImageResource(int resId){
+        getCenterImageView().setImageResource(resId);
+    }
 
     /**
      * 获取音量、亮度组View
@@ -192,6 +274,15 @@ public class VideoHolder {
      */
     public FrameLayout getVoiceBrightnessGroup() {
         return ijk_voice_brightness;
+    }
+
+    /**
+     * 设置音量、亮度组View是否可见
+     *
+     * @param show
+     */
+    public void setVoiceBrightnessGroupVisibility(boolean show) {
+        getVoiceBrightnessGroup().setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -204,12 +295,66 @@ public class VideoHolder {
     }
 
     /**
+     * 设置进度文字是否可见
+     *
+     * @param show
+     */
+    public void setProgressTextVisibility(boolean show) {
+        getVideoCircleProgressView().setProgressTextVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * 设置进度文字
+     *
+     * @param value
+     */
+    public void setCircleProgressText(String value) {
+        getVideoCircleProgressView().setProgressText(value);
+    }
+
+    /**
+     * 设置圆圈进度最大值
+     *
+     * @param max
+     */
+    public void setCircleProgressMax(int max) {
+        getVideoCircleProgressView().setMax(max);
+    }
+
+    /**
+     * 设置圆圈进度值
+     *
+     * @param progress
+     */
+    public void setCircleProgress(int progress) {
+        getVideoCircleProgressView().setProgress(progress);
+    }
+
+    /**
      * 获取视频音量图标
      *
      * @return
      */
     public VideoVoice getVideoVoiceView() {
         return ijk_video_voice;
+    }
+
+    /**
+     * 设置视频音量是否可见
+     *
+     * @param show
+     */
+    public void setVideoVoiceVisibility(boolean show) {
+        getVideoVoiceView().setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * 设置音量的百分比值
+     *
+     * @param percent
+     */
+    public void setVideoVoiceValue(float percent) {
+        getVideoVoiceView().setValue(percent);
     }
 
     /**
@@ -222,12 +367,57 @@ public class VideoHolder {
     }
 
     /**
+     * 设置视频亮度是否可见
+     *
+     * @param show
+     */
+    public void setVideoBrightnessVisibility(boolean show) {
+        getVideoBrightnessView().setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * 设置视频亮度值
+     *
+     * @param percent
+     */
+    public void setVideoBrightnessValue(float percent) {
+        getVideoBrightnessView().setValue(percent);
+    }
+
+    /**
      * 获取缓冲速度TextView
      *
      * @return
      */
     public TextView getSpeedTextView() {
         return tv_ijk_speed;
+    }
+
+    /**
+     * 设置网速文字是否可见
+     *
+     * @param show
+     */
+    public void setSpeedTextViewVisibility(boolean show) {
+        getSpeedTextView().setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * 网速文字是否可见
+     *
+     * @return
+     */
+    public boolean isSpeedTextViewVisible() {
+        return getSpeedTextView().getVisibility() == View.VISIBLE;
+    }
+
+    /**
+     * 设置网速文字
+     *
+     * @param value
+     */
+    public void setSpeedText(String value) {
+        getSpeedTextView().setText(value);
     }
 
     /**
@@ -239,5 +429,13 @@ public class VideoHolder {
         return iv_ijk_cover;
     }
 
+    /**
+     * 设置封面是否显示
+     *
+     * @param show
+     */
+    public void setCoverVisibility(boolean show) {
+        getCoverImageView().setVisibility(show ? View.VISIBLE : View.GONE);
+    }
 
 }

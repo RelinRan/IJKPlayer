@@ -6,7 +6,7 @@ IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 ![视频音量](https://github.com/RelinRan/IJKPlayer/blob/master/ic_voice.png)  
 ![视频进度](https://github.com/RelinRan/IJKPlayer/blob/master/ic_progress.png)  
 
-#### FIX - 2024.7.20.1
+#### Fix
 1.更新编译为ff4.0--ijk0.8.8--20210426--001版本;  
 2.Android 11以上高版本报错问题    
 3.音量、光亮、进度调节逻辑修改  
@@ -15,6 +15,11 @@ IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 6.去掉loading显示,显示实时网速缓冲  
 7.自定义亮度、音量控件跟随手势变化  
 8.增加手势滑动视频进度改变，同时中间显示滑动百分比显示  
+9.快速来回滑动，出现水平和垂直冲突显示  
+10.水平滑动修改视频进度增加网速缓冲显示   
+11.增加VideoHolder常用的一些控制方法  
+12.修改自定义View对应包名  
+13.VideoView新增setDisplay方法设置显示方式  
 
 #### [AAR]
 [aar文件](https://github.com/RelinRan/IJKPlayer/blob/master/aar)
@@ -46,7 +51,7 @@ allprojects {
 项目/app/build.grade
 ```
 dependencies {
-	    implementation 'com.github.RelinRan:IJKPlayer:2024.7.20.1'
+	    implementation 'com.github.RelinRan:IJKPlayer:2024.7.22.1'
 	}
 ```
 #### 权限配置
@@ -114,7 +119,7 @@ path.xml
 
 #### xml布局
 ```
-<androidx.ijk.view.IJKVideoView
+<androidx.ijk.widget.VideoView
     android:id="@+id/ijk"
     android:layout_width="match_parent"
     android:layout_height="220dp"
@@ -124,7 +129,7 @@ path.xml
 ```
 //初始化建议配置在Application
 IJK ijk = IJK.config();
-//设置显示方式
+//设置默认显示方式
 ijk.display(Display.AUTO);
 //使用硬解码器解码
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
@@ -175,24 +180,28 @@ ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "nobuffer");
 ```
 #### 播放视频
 ```
-IJKVideoView ijk = findViewById(R.id.ijk);
+VideoView video = findViewById(R.id.ijk);
+//修改默认的显示方式
+video.setDisplay(Display.AUTO);
 //是否是直播源
-ijk.setLiveSource(true);
+video.setLiveSource(true);
+//视频控制ViewHolder
+VideoHolder holder = video.getViewHolder();
 //自定义全屏还是小屏幕显示，不设置就采用默认的逻辑；
-ijk.setOnIJKVideoSwitchScreenListener(orientation -> {
+video.setOnVideoSwitchScreenListener(orientation -> {
     //TODO: 自定显示方式 
 });
 //播放视频
-String url = "http://xxx";
+String url = "https://stream7.iqilu.com/10339/upload_transcode/202002/09/20200209105011F0zPoYzHry.mp4";
 //开始播放
-String source = ijk.getDataSource();
+String source = video.getDataSource();
 if (TextUtils.isEmpty(source)) {
-    ijk.setDataSource(url);
-    ijk.start();
+    video.setDataSource(url);
+    video.start();
 } else {
-    ijk.reset();
-    ijk.setDataSource(url);
-    ijk.prepareAsync();
+    video.reset();
+    video.setDataSource(url);
+    video.prepareAsync();
 }
 ```
 #### 颜色配置

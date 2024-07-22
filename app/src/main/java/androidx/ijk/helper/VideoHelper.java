@@ -44,7 +44,7 @@ public class VideoHelper {
     private long progress;
     private float progressPercent;
     //是否调试模式
-    private boolean debug = true;
+    private boolean debug = false;
     private ViewGroup videoParent;
 
 
@@ -59,6 +59,14 @@ public class VideoHelper {
      */
     public void setDebug(boolean debug) {
         this.debug = debug;
+    }
+
+    /**
+     * 是否调试模式
+     * @return
+     */
+    public boolean isDebug() {
+        return debug;
     }
 
     /**
@@ -214,6 +222,12 @@ public class VideoHelper {
     }
 
     /**
+     * 滑动类型记录，1：水平滑动；2：垂直滑动
+     * 主要防止，滑动中途修改滑动类型改变
+     */
+    private int scrollType = 0;
+
+    /**
      * 触摸事件
      *
      * @param context      上下文对象
@@ -245,9 +259,23 @@ public class VideoHelper {
                 float width = view.getMeasuredWidth();
                 float height = view.getMeasuredHeight();
                 //向量角度
-                double angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
-                boolean isHorizontalAngle = (angle > -45 && angle < 45) || (angle > -180 && angle < -135) || (angle > 135 && angle < 180);
-                if (absDeltaX > 50 && absDeltaX > absDeltaY && isHorizontalAngle && isLiveSource == false) {
+                double angle = Math.toDegrees(Math.atan2(deltaY, deltaX));
+                angle = angle < 0 ? angle + 360 : angle;
+                //水平左边滑动
+                boolean hls = absDeltaX > absDeltaY && deltaX < 0 && angle >= 135 && angle <= 225;
+                //水平右边滑动
+                boolean hrs = absDeltaX > absDeltaY && deltaX > 0 && (angle >= 315 || angle <= 45);
+                //垂直向上
+                boolean vts = absDeltaY > absDeltaX && deltaY < 0 && angle >= 225 && angle <= 315;
+                //垂直向下
+                boolean vbs = absDeltaY > absDeltaX && deltaY > 0 && angle >= 45 && angle <= 135;
+                //垂直向下
+                if (debug) {
+                    Log.d(TAG, "deltaX：" + deltaX + ",deltaY:" + deltaY + ",angle:" + angle + ",hls:" + hls + ",hrs:" + hrs + ",vts:" + vts + ",vbs:" + vbs);
+                }
+                boolean isHorizontalScroll = hls || hrs;
+                boolean isHorizontalType = scrollType == 1 || scrollType == -1;
+                if (isHorizontalType && isHorizontalScroll && isLiveSource == false) {
                     float horizontalPercent = deltaX / width;
                     if (currentProgress == -1) {
                         currentProgress = current;
@@ -264,15 +292,14 @@ public class VideoHelper {
                         progress = progress > duration ? duration : progress;
                     }
                     progressPercent = progress * 1.0f / duration;
-                    if (debug) {
-                        Log.d(TAG, "deltaX：" + deltaX + ",progress:" + progress + ",duration:" + duration + ",progressPercent:" + progressPercent + ",angle:" + angle);
-                    }
                     if (listener != null) {
                         listener.onVideoStartChangeProgress(progress, progressPercent);
                     }
+                    scrollType = 1;
                 }
-                boolean isVerticalAngle = ((angle > -135 && angle < -45) || (angle > 45 && angle < 135));
-                if (absDeltaY > 50 && absDeltaY > absDeltaX && isVerticalAngle) {
+                boolean isVerticalScroll = vts || vbs;
+                boolean isVerticalType = scrollType == 2 || scrollType == -1;
+                if (isVerticalType && isVerticalScroll) {
                     float verticalPercent = deltaY / height;
                     //左边右边判断
                     float horizontalMiddleX = view.getMeasuredWidth() / 2;
@@ -280,7 +307,6 @@ public class VideoHelper {
                         //当前亮度值
                         if (currentBrightness == -1) {
                             currentBrightness = getCurrentBrightness(context);
-                            Log.d(TAG, "currentBrightness:" + currentBrightness);
                         }
                         float deltaBrightness = verticalPercent;
                         float brightness;
@@ -293,9 +319,6 @@ public class VideoHelper {
                             //向下滑动减小音量
                             brightness = currentBrightness - Math.abs(deltaBrightness);
                             brightness = brightness < 0 ? 0 : brightness;
-                        }
-                        if (debug) {
-                            Log.d(TAG, "brightness:" + brightness + ",brightnessPercent:" + brightness + ",verticalPercent:" + verticalPercent + ",angle:" + angle);
                         }
                         if (listener != null) {
                             listener.onVideoChangeBrightness(brightness, brightness);
@@ -322,19 +345,18 @@ public class VideoHelper {
                             volume = volume < 0 ? 0 : volume;
                         }
                         float volumePercent = volume * 1F / maxVolume;
-                        if (debug) {
-                            Log.d(TAG, "maxVolume:" + maxVolume + ",volume:" + volume + ",volumePercent:" + volumePercent + ",verticalPercent:" + verticalPercent);
-                        }
                         if (listener != null) {
-                            listener.onVideoChangeVoice(volume, volume * 1F / maxVolume);
+                            listener.onVideoChangeVoice(volume, volumePercent);
                         }
                     }
+                    scrollType = 2;
                 }
                 if (listener != null) {
                     listener.onVideoActionMove(event);
                 }
                 break;
             case MotionEvent.ACTION_UP:
+                scrollType = -1;
                 currentProgress = -1;
                 currentVolume = -1;
                 currentBrightness = -1;

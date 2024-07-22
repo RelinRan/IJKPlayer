@@ -2,7 +2,6 @@ package androidx.ijk.widget;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
@@ -30,6 +29,7 @@ import androidx.core.content.ContextCompat;
 import androidx.ijk.IJK;
 import androidx.ijk.IJKOption;
 import androidx.ijk.R;
+import androidx.ijk.enums.Display;
 import androidx.ijk.enums.Orientation;
 import androidx.ijk.helper.OnVideoTouchListener;
 import androidx.ijk.helper.VideoHelper;
@@ -92,7 +92,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     /**
      * 控制器ViewHolder
      */
-    private VideoHolder controlViewHolder;
+    private VideoHolder videoHolder;
     /**
      * 是否播放结束
      */
@@ -100,15 +100,11 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     /**
      * IJK助手
      */
-    private VideoHelper ijkHelper;
+    private VideoHelper videoHelper;
     /**
      * 视频控件父容器
      */
     private ViewGroup container;
-    /**
-     * 最新图
-     */
-    private Bitmap bitmap;
     /**
      * 是否是直播数据源
      */
@@ -121,7 +117,10 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
      * 是否已经准备过
      */
     private boolean isPrepared;
-
+    /**
+     * 时长Handler
+     */
+    private DurationTimer durationTimer;
     /**
      * 屏幕切换监听
      *
@@ -129,20 +128,34 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
      */
     private OnVideoSwitchScreenListener onVideoSwitchScreenListener;
 
-
     public VideoView(@NonNull Context context) {
-        super(context);
-        init(context, null);
+        this(context, null);
     }
 
     public VideoView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        init(context, attrs);
+        this(context, attrs, 0);
     }
 
     public VideoView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context, attrs);
+        setBackgroundColor(Color.BLACK);
+        durationTimer = new DurationTimer();
+        videoHelper = new VideoHelper();
+        container = (ViewGroup) getParent();
+        initMediaPlayer();
+        initVideoSurface(context);
+        initControlViews();
+    }
+
+    /**
+     * 设置是否调试
+     *
+     * @param debug
+     */
+    public void setDebug(boolean debug) {
+        if (videoHelper != null) {
+            videoHelper.setDebug(debug);
+        }
     }
 
     /**
@@ -153,11 +166,11 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     public void setLiveSource(boolean liveSource) {
         this.liveSource = liveSource;
         if (isLiveSource()) {
-            controlViewHolder.getSeekBar().setEnabled(false);
-            controlViewHolder.getSeekBar().setThumb(null);
+            videoHolder.setSeekBarEnabled(false);
+            videoHolder.setSeekBarThumb(null);
         } else {
-            controlViewHolder.getSeekBar().setEnabled(true);
-            controlViewHolder.getSeekBar().setThumb(ContextCompat.getDrawable(getContext(), R.drawable.ijk_seek_dot));
+            videoHolder.setSeekBarEnabled(true);
+            videoHolder.setSeekBarThumb(ContextCompat.getDrawable(getContext(), R.drawable.ijk_seek_dot));
         }
     }
 
@@ -180,27 +193,12 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     }
 
     /**
-     * 初始化播放器
-     *
-     * @param context 上下文
-     * @param attrs   xml参数
-     */
-    private void init(Context context, AttributeSet attrs) {
-        setBackgroundColor(Color.BLACK);
-        ijkHelper = new VideoHelper();
-        container = (ViewGroup) getParent();
-        initMediaPlayer();
-        initVideoSurface(context);
-        initControlViews();
-    }
-
-    /**
      * 播放操作助手
      *
      * @return
      */
-    public VideoHelper getIjkHelper() {
-        return ijkHelper;
+    public VideoHelper getVideoHelper() {
+        return videoHelper;
     }
 
     /**
@@ -273,27 +271,24 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
             controlViewParams.gravity = Gravity.BOTTOM;
             addView(controlView, controlViewParams);
         }
-        controlViewHolder = new VideoHolder(this, controlView);
-        controlViewHolder.findViews();
+        videoHolder = new VideoHolder(this, controlView);
+        videoHolder.findViews();
         //中间控件隐藏
-        controlViewHolder.getCenterImageView().setVisibility(GONE);
-        controlViewHolder.getVoiceBrightnessGroup().setVisibility(GONE);
-        controlViewHolder.getSpeedTextView().setVisibility(GONE);
-        controlViewHolder.getCoverImageView().setVisibility(GONE);
+        videoHolder.setCenterImageVisibility(false);
+        videoHolder.setVoiceBrightnessGroupVisibility(false);
+        videoHolder.setSpeedTextViewVisibility(false);
+        videoHolder.setCoverVisibility(false);
         //底部播放按钮监听
-        controlViewHolder.getPlayView().setOnClickListener(this);
+        videoHolder.getPlayView().setOnClickListener(this);
         //底部屏幕转换按钮监听
-        controlViewHolder.getScreenSwitchView().setOnClickListener(this);
+        videoHolder.getScreenSwitchView().setOnClickListener(this);
         //中间播放按钮监听
-        controlViewHolder.getCenterImageView().setOnClickListener(this);
+        videoHolder.getCenterImageView().setOnClickListener(this);
         //进度条监听
-        controlViewHolder.getSeekBar().setOnSeekBarChangeListener(this);
+        videoHolder.getSeekBar().setOnSeekBarChangeListener(this);
         //是否直播
         controlView.setVisibility(isLiveSource() ? GONE : VISIBLE);
     }
-
-    private int beforeWidth;
-    private int beforeHeight;
 
     @Override
     public void onClick(View view) {
@@ -313,9 +308,35 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
             if (onVideoSwitchScreenListener != null) {
                 onVideoSwitchScreenListener.onVideoSwitchScreen(orientation);
             } else {
-                ijkHelper.switchScreen(getContext(), this, orientation);
+                videoHelper.switchScreen(getContext(), this, orientation);
                 setVideoDisplaySize(getMeasuredHeight(), getMeasuredWidth());
             }
+        }
+    }
+
+    /**
+     * 设置显示类型
+     *
+     * @param display 显示类型
+     */
+    public void setDisplay(Display display) {
+        if (textureView != null) {
+            textureView.setDisplay(display);
+        }
+    }
+
+    /**
+     * 设置显示类型
+     *
+     * @param display       显示类型
+     * @param displayWidth  显示宽度
+     * @param displayHeight 显示高度
+     * @param videoWidth    视频宽度
+     * @param videoHeight   视频高度
+     */
+    public void setDisplay(Display display, int displayWidth, int displayHeight, int videoWidth, int videoHeight) {
+        if (textureView != null) {
+            textureView.setDisplay(display, displayWidth, displayHeight, videoWidth, videoHeight);
         }
     }
 
@@ -350,7 +371,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        controlViewHolder.getVoiceBrightnessGroup().setVisibility(GONE);
+        videoHolder.setVoiceBrightnessGroupVisibility(false);
     }
 
     /**
@@ -512,9 +533,9 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
         showLoading();
         mediaPlayer.reset();
         mediaPlayer.setSurface(surface);
-        controlViewHolder.getSeekBar().setProgress(0);
-        showVideoTime(0, controlViewHolder.getCurrentView());
-        showVideoTime(0, controlViewHolder.getDurationView());
+        videoHolder.setSeekBarProgress(0);
+        showVideoTime(0, videoHolder.getCurrentView());
+        showVideoTime(0, videoHolder.getDurationView());
         setDataSource(path);
         start();
     }
@@ -523,36 +544,36 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
      * 视频暂停
      */
     public void pause() {
-        controlViewHolder.getSpeedTextView().setVisibility(GONE);
-        controlViewHolder.getCenterImageView().setVisibility(VISIBLE);
-        controlViewHolder.getCenterImageView().setImageResource(R.mipmap.ic_ijk_pause_center);
-        controlViewHolder.getPlayView().setImageResource(R.mipmap.ic_ijk_pause_control);
+        videoHolder.setSpeedTextViewVisibility(false);
+        videoHolder.setCenterImageVisibility(true);
+        videoHolder.setCenterImageResource(R.mipmap.ic_ijk_pause_center);
+        videoHolder.setPlayImageResource(R.mipmap.ic_ijk_pause_control);
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
         }
-        stopVideoProgress();
+        durationTimer.stop();
     }
 
     /**
      * 视频播放完毕
      */
     protected void onCompletion() {
-        controlViewHolder.getCenterImageView().setVisibility(VISIBLE);
-        controlViewHolder.getCenterImageView().setImageResource(R.mipmap.ic_ijk_replay);
-        controlViewHolder.getPlayView().setImageResource(R.mipmap.ic_ijk_pause_control);
-        stopVideoProgress();
+        videoHolder.setCenterImageVisibility(true);
+        videoHolder.setCenterImageResource(R.mipmap.ic_ijk_replay);
+        videoHolder.setPlayImageResource(R.mipmap.ic_ijk_pause_control);
+        durationTimer.stop();
     }
 
     /**
      * 视频恢复播放
      */
     public void resume() {
-        controlViewHolder.getCenterImageView().setVisibility(GONE);
-        controlViewHolder.getPlayView().setImageResource(R.mipmap.ic_ijk_play_control);
+        videoHolder.setCenterImageVisibility(false);
+        videoHolder.setPlayImageResource(R.mipmap.ic_ijk_play_control);
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
         }
-        startVideoProgress();
+        durationTimer.start();
     }
 
     /**
@@ -561,7 +582,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     public void prepareAsync() {
         isPlayEnd = false;
         isPrepared = false;
-        controlViewHolder.getCenterImageView().setVisibility(GONE);
+        videoHolder.setCenterImageVisibility(false);
         mediaPlayer.prepareAsync();
     }
 
@@ -572,7 +593,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
         showLoading();
         isPlayEnd = false;
         isPrepared = false;
-        controlViewHolder.getCenterImageView().setVisibility(GONE);
+        videoHolder.setCenterImageVisibility(false);
         mediaPlayer.prepareAsync();
     }
 
@@ -592,7 +613,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
         release();
         AudioManager am = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         am.abandonAudioFocus(null);
-        stopVideoProgress();
+        durationTimer.stop();
         IjkMediaPlayer.native_profileEnd();
     }
 
@@ -611,8 +632,8 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
      *
      * @return
      */
-    public VideoHolder getControlViewHolder() {
-        return controlViewHolder;
+    public VideoHolder getVideoHolder() {
+        return videoHolder;
     }
 
     /**
@@ -722,7 +743,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
         Log.i(TAG, "onSurfaceTextureAvailable " + width + "," + height);
         surface = new Surface(surfaceTexture);
-        controlViewHolder.getCoverImageView().setVisibility(GONE);
+        videoHolder.setCoverVisibility(false);
         setSurface(surface);
     }
 
@@ -740,10 +761,9 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-        bitmap = textureView.getBitmap();
         Log.i(TAG, "onSurfaceTextureUpdated");
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            controlViewHolder.getCoverImageView().setVisibility(GONE);
+            videoHolder.setCoverVisibility(false);
         }
     }
 
@@ -752,7 +772,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     public void onPrepared(IMediaPlayer iMediaPlayer) {
         this.iMediaPlayer = iMediaPlayer;
         isPrepared = true;
-        if (iMediaPlayer.getDuration()==0){
+        if (iMediaPlayer.getDuration() == 0) {
             setLiveSource(true);
         }
         if (isLiveSource()) {
@@ -782,16 +802,16 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
         this.iMediaPlayer = iMediaPlayer;
         Log.i(TAG, "onInfo what:" + what + ",args:" + args);
         if (what == IjkMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
-            controlViewHolder.getPlayView().setImageResource(R.mipmap.ic_ijk_play_control);
+            videoHolder.setPlayImageResource(R.mipmap.ic_ijk_play_control);
             if (onIJKVideoListener != null) {
                 onIJKVideoListener.onVideoRenderingStart(iMediaPlayer, args);
             }
             //消失封面
-            controlViewHolder.getCoverImageView().setVisibility(GONE);
+            videoHolder.setCoverVisibility(false);
             //消失Loading
             dismissLoading();
             //开始计时
-            startVideoProgress();
+            durationTimer.start();
             //如不是自动播放暂停
             if (!IJK.config().isAutoPlay()) {
                 pause();
@@ -802,22 +822,31 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
                 onIJKVideoListener.onVideoSeekEnable(false);
             }
         }
+        if (what == IjkMediaPlayer.MEDIA_INFO_MEDIA_ACCURATE_SEEK_COMPLETE) {
+            showLoading();
+        }
+        if (what == IjkMediaPlayer.MEDIA_INFO_AUDIO_SEEK_RENDERING_START) {
+
+        }
+        if (what == IjkMediaPlayer.MEDIA_INFO_VIDEO_SEEK_RENDERING_START) {
+            dismissLoading();
+        }
         if (what == IjkMediaPlayer.MEDIA_INFO_BUFFERING_START) {
             showLoading();
             if (onIJKVideoListener != null) {
                 onIJKVideoListener.onVideoBufferingStart(iMediaPlayer, args);
             }
-            stopVideoProgress();
+            durationTimer.stop();
         }
         if (what == IjkMediaPlayer.MEDIA_INFO_BUFFERING_END) {
             //消失封面
-            controlViewHolder.getCoverImageView().setVisibility(GONE);
+            videoHolder.setCoverVisibility(false);
             //消失加载
             dismissLoading();
             if (onIJKVideoListener != null) {
                 onIJKVideoListener.onVideoBufferingEnd(iMediaPlayer, args);
             }
-            startVideoProgress();
+            durationTimer.start();
         }
         if (what == IjkMediaPlayer.MEDIA_INFO_VIDEO_ROTATION_CHANGED) {
             if (onIJKVideoListener != null) {
@@ -853,7 +882,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
         onCompletion();
         this.iMediaPlayer = iMediaPlayer;
         //播放完毕，进度条满格
-        showVideoTime(iMediaPlayer.getDuration(), controlViewHolder.getCurrentView());
+        showVideoTime(iMediaPlayer.getDuration(), videoHolder.getCurrentView());
         Log.i(TAG, "onCompletion");
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoCompletion(iMediaPlayer);
@@ -871,36 +900,21 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
         return false;
     }
 
-    /**
-     * 开始进度获取标识
-     */
-    private int WHAT_GET_DURATION = 0;
+    private class DurationTimer extends Handler {
 
-    /**
-     * 开始进度获取
-     */
-    private void startVideoProgress() {
-        if (durationHandler != null) {
-            durationHandler.sendEmptyMessage(WHAT_GET_DURATION);
+        private int WHAT_GET_DURATION = 0;
+
+
+        public void start() {
+            sendEmptyMessage(WHAT_GET_DURATION);
         }
-    }
 
-    /**
-     * 停止进度获取
-     */
-    private void stopVideoProgress() {
-        if (durationHandler != null) {
-            durationHandler.removeMessages(WHAT_GET_DURATION);
+        public void stop() {
+            removeMessages(WHAT_GET_DURATION);
         }
-    }
-
-    /**
-     * 时长Handler
-     */
-    private Handler durationHandler = new Handler() {
 
         @Override
-        public void handleMessage(Message msg) {
+        public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             if (msg.what == WHAT_GET_DURATION && iMediaPlayer != null) {
                 long duration = isLiveSource() ? 0 : iMediaPlayer.getDuration();
@@ -915,7 +929,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
                 sendEmptyMessageDelayed(WHAT_GET_DURATION, 1000);
             }
         }
-    };
+    }
 
     /**
      * 视频进度
@@ -925,10 +939,10 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
      * @param current      当前进度
      */
     protected void onVideoProgress(IMediaPlayer iMediaPlayer, long duration, long current) {
-        controlViewHolder.getSeekBar().setMax((int) duration);
-        controlViewHolder.getSeekBar().setProgress((int) current);
-        showVideoTime(current, controlViewHolder.getCurrentView());
-        showVideoTime(duration, controlViewHolder.getDurationView());
+        videoHolder.setSeekBarMax((int) duration);
+        videoHolder.setSeekBarProgress((int) current);
+        showVideoTime(current, videoHolder.getCurrentView());
+        showVideoTime(duration, videoHolder.getDurationView());
     }
 
     /**
@@ -958,14 +972,14 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
      * 显示Loading
      */
     public void showLoading() {
-        controlViewHolder.getSpeedTextView().setVisibility(VISIBLE);
+        videoHolder.setSpeedTextViewVisibility(true);
     }
 
     /**
      * 消失Loading
      */
     public void dismissLoading() {
-        controlViewHolder.getSpeedTextView().setVisibility(GONE);
+        videoHolder.setSpeedTextViewVisibility(false);
     }
 
     @Override
@@ -976,18 +990,18 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     //*******************************[onTouchEvent]*********************************
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return ijkHelper.onTouchEvent(getContext(), isLiveSource(), event, this, mediaPlayer == null ? 0 : mediaPlayer.getCurrentPosition(), mediaPlayer.getDuration(), this);
+        return videoHelper.onTouchEvent(getContext(), isLiveSource(), event, this, mediaPlayer == null ? 0 : mediaPlayer.getCurrentPosition(), mediaPlayer.getDuration(), this);
     }
 
     @Override
     public void onVideoChangeBrightness(float value, float percent) {
-        ijkHelper.changeBrightness(getContext(), value);
+        videoHelper.changeBrightness(getContext(), value);
         showCircleProgressPercent(percent, ProgressType.BRIGHTNESS);
     }
 
     @Override
     public void onVideoChangeVoice(int value, float percent) {
-        ijkHelper.changeVoice(getContext(), value);
+        videoHelper.changeVoice(getContext(), value);
         showCircleProgressPercent(percent, ProgressType.VOICE);
     }
 
@@ -995,14 +1009,14 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     public void onVideoStartChangeProgress(long value, float percent) {
         long current = mediaPlayer.getCurrentPosition();
         boolean isForward = value - current > 0;
-        controlViewHolder.getSeekBar().setProgress((int) value);
+        videoHolder.setSeekBarProgress((int) value);
         showCircleProgressPercent(percent, isForward ? ProgressType.FORWARD : ProgressType.BACKWARD);
     }
 
     @Override
     public void onVideoStopChangeProgress(long value, float percent) {
         mediaPlayer.seekTo(value);
-        controlViewHolder.getSeekBar().setProgress((int) value);
+        videoHolder.setSeekBarProgress((int) value);
     }
 
     @Override
@@ -1012,7 +1026,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
 
     @Override
     public void onVideoControlViewHide(MotionEvent event) {
-        controlViewHolder.getVoiceBrightnessGroup().setVisibility(GONE);
+        videoHolder.setVoiceBrightnessGroupVisibility(false);
     }
 
     @Override
@@ -1048,7 +1062,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
      * 显示网速
      */
     private void showSpeed() {
-        if (controlViewHolder.getSpeedTextView().getVisibility() == View.VISIBLE) {
+        if (videoHolder.isSpeedTextViewVisible()) {
             long totalRxBytes = TrafficStats.getTotalRxBytes();
             if (lastRxBytes == 0) {
                 lastRxBytes = totalRxBytes;
@@ -1065,7 +1079,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
             } else {
                 speedText = speed / 1024 + "Kbps";
             }
-            controlViewHolder.getSpeedTextView().setText(speedText);
+            videoHolder.setSpeedText(speedText);
             lastRxBytes = totalRxBytes;
             lastRxTime = time;
         }
@@ -1088,33 +1102,42 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
      */
     private void showCircleProgressPercent(float percent, ProgressType type) {
         percent = percent > 1 || percent < 0 ? 0 : percent;
-        controlViewHolder.getVoiceBrightnessGroup().setVisibility(VISIBLE);
+        int progress = (int) (percent * 100);
+        progress = progress > 100 ? 100 : progress;
+        videoHolder.setVoiceBrightnessGroupVisibility(true);
         String progressText = "";
         //音量
         if (type == ProgressType.VOICE) {
-            controlViewHolder.getVideoCircleProgressView().setProgressTextVisibility(View.GONE);
-            controlViewHolder.getVideoVoiceView().setVisibility(VISIBLE);
-            controlViewHolder.getVideoVoiceView().setValue(percent);
-            controlViewHolder.getVideoBrightnessView().setVisibility(GONE);
+            videoHolder.setProgressTextVisibility(false);
+            videoHolder.setVideoVoiceVisibility(true);
+            videoHolder.setVideoVoiceValue(percent);
+            videoHolder.setVideoBrightnessVisibility(false);
         }
         //亮度
         else if (type == ProgressType.BRIGHTNESS) {
-            controlViewHolder.getVideoCircleProgressView().setProgressTextVisibility(View.GONE);
-            controlViewHolder.getVideoBrightnessView().setVisibility(VISIBLE);
-            controlViewHolder.getVideoBrightnessView().setValue(percent);
-            controlViewHolder.getVideoVoiceView().setVisibility(GONE);
+            videoHolder.setProgressTextVisibility(false);
+            videoHolder.setVideoBrightnessVisibility(true);
+            videoHolder.setVideoBrightnessValue(percent);
+            videoHolder.setVideoVoiceVisibility(false);
         }
         //快进 快退
         else if (type == ProgressType.FORWARD || type == ProgressType.BACKWARD) {
-            controlViewHolder.getVideoBrightnessView().setVisibility(GONE);
-            controlViewHolder.getVideoVoiceView().setVisibility(GONE);
-            controlViewHolder.getVideoCircleProgressView().setProgressTextVisibility(View.VISIBLE);
-            int value = (int) (percent * 100);
-            progressText = value + "%";
+            videoHolder.setVideoBrightnessVisibility(false);
+            videoHolder.setVideoVoiceVisibility(false);
+            videoHolder.setProgressTextVisibility(true);
         }
-        controlViewHolder.getVideoCircleProgressView().setProgressText(progressText);
-        controlViewHolder.getVideoCircleProgressView().setMax(100);
-        controlViewHolder.getVideoCircleProgressView().setProgress((int) (percent * 100f));
+        progressText = progress + "%";
+        videoHolder.setCircleProgressText(progressText);
+        videoHolder.setCircleProgressMax(100);
+        videoHolder.setCircleProgress(progress);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (durationTimer != null) {
+            durationTimer.stop();
+        }
     }
 
 }
