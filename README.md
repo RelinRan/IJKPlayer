@@ -21,6 +21,7 @@ IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 12.修改自定义View对应包名  
 13.VideoView新增setDisplay方法设置显示方式  
 
+
 #### [AAR]
 [aar文件](https://github.com/RelinRan/IJKPlayer/blob/master/aar)
 ```
