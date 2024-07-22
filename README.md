@@ -36,7 +36,6 @@ android {
 dependencies {
     implementation(name: 'IJKPlayer', ext: 'aar')
 }
-
 ```
 #### JitPack
 项目/build.grade
