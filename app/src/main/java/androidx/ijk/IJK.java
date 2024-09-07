@@ -4,6 +4,7 @@ import android.view.View;
 
 import androidx.annotation.LayoutRes;
 import androidx.ijk.enums.Display;
+import androidx.ijk.model.Ratio;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,10 @@ public class IJK {
      * 显示方式
      */
     private Display display = Display.AUTO;
+    /**
+     * 视频比例
+     */
+    private Ratio ratio;
     /**
      * 配置文件
      */
@@ -44,6 +49,7 @@ public class IJK {
 
     private IJK() {
         options = new ArrayList<>();
+        ratio = new Ratio(16, 9);
         //加载IJK so文件
         try {
             IjkMediaPlayer.loadLibrariesOnce(null);
@@ -76,6 +82,25 @@ public class IJK {
      */
     public Display display() {
         return display;
+    }
+
+    /**
+     * 视频比例
+     *
+     * @return
+     */
+    public Ratio ratio() {
+        return ratio;
+    }
+
+    /**
+     * 设置比例 16:9 4:3
+     *
+     * @param width   宽度值或宽比值，例如1920或16
+     * @param height  高度值或高比值，例如1080或9
+     */
+    public void ratio(int width, int height) {
+        this.ratio = new Ratio(width, height);
     }
 
     /**
@@ -120,6 +145,7 @@ public class IJK {
 
     /**
      * 是否自动播放
+     *
      * @return
      */
     public boolean isAutoPlay() {
@@ -128,6 +154,7 @@ public class IJK {
 
     /**
      * 是否自动播放
+     *
      * @param autoPlay
      * @return
      */
@@ -203,6 +230,7 @@ public class IJK {
 
     /**
      * 设置显示类型
+     *
      * @param display
      * @return
      */

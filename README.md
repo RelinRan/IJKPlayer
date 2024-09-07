@@ -20,7 +20,8 @@ IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 11.增加VideoHolder常用的一些控制方法  
 12.修改自定义View对应包名  
 13.VideoView新增setDisplay方法设置显示方式  
-
+14.VideoView新增setRatio方法设置显示比例  
+15.手势滑动显示多指滑动  
 
 #### [AAR]
 [aar文件](https://github.com/RelinRan/IJKPlayer/blob/master/aar)
@@ -51,7 +52,7 @@ allprojects {
 项目/app/build.grade
 ```
 dependencies {
-	    implementation 'com.github.RelinRan:IJKPlayer:2024.7.22.1'
+	    implementation 'com.github.RelinRan:IJKPlayer:2024.9.7.1'
 	}
 ```
 #### 权限配置
@@ -131,6 +132,8 @@ path.xml
 IJK ijk = IJK.config();
 //设置默认显示方式
 ijk.display(Display.AUTO);
+//设置默认显示比例
+ijk.ratio(16,9);
 //使用硬解码器解码
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
 //自动旋转视频画面
@@ -183,6 +186,8 @@ ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "nobuffer");
 VideoView video = findViewById(R.id.ijk);
 //修改默认的显示方式
 video.setDisplay(Display.AUTO);
+//修改模式显示比例,注意：比例修改只适用Display.RATIO_WIDTH和Display.RATIO_HEIGHT
+video.setRatio(Display.RATIO_WIDTH,16,9);
 //是否是直播源
 video.setLiveSource(true);
 //视频控制ViewHolder

@@ -6,6 +6,14 @@ package androidx.ijk.enums;
 public enum Display {
 
     /**
+     * 显示方式 - 宽度按比例显示；注意：必须设置Ratio值
+     */
+    RATIO_WIDTH,
+    /**
+     * 显示方式 - 高度按比例显示；注意：必须设置Ratio值
+     */
+    RATIO_HEIGHT,
+    /**
      * 显示方式 - 原大小
      */
     ORIGINAL,
@@ -14,12 +22,16 @@ public enum Display {
      */
     AUTO,
     /**
-     * 显示方式 - 按照填充宽度比例显示
+     * 显示方式 - 填充宽度比例显示
      */
-    WIDTH,
+    MATCH_WIDTH,
     /**
-     * 显示方式 - 按照填充高度比例显示
+     * 显示方式 - 填充高度比例显示
      */
-    HEIGHT,
+    MATCH_HEIGHT,
+    /**
+     * 显示方式 - 填充宽高显示
+     */
+    MATCH_PARENT,
 
 }

@@ -12,6 +12,7 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Size;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -35,6 +36,7 @@ import androidx.ijk.helper.OnVideoTouchListener;
 import androidx.ijk.helper.VideoHelper;
 import androidx.ijk.listener.OnVideoListener;
 import androidx.ijk.listener.OnVideoSwitchScreenListener;
+import androidx.ijk.model.Ratio;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -127,6 +129,10 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
      * @param context
      */
     private OnVideoSwitchScreenListener onVideoSwitchScreenListener;
+    /**
+     * 调试模式
+     */
+    private boolean debug;
 
     public VideoView(@NonNull Context context) {
         this(context, null);
@@ -148,13 +154,26 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     }
 
     /**
+     * 是否调试模式
+     *
+     * @return
+     */
+    public boolean isDebug() {
+        return debug;
+    }
+
+    /**
      * 设置是否调试
      *
      * @param debug
      */
     public void setDebug(boolean debug) {
+        this.debug = debug;
         if (videoHelper != null) {
             videoHelper.setDebug(debug);
+        }
+        if (textureView != null) {
+            textureView.setDebug(debug);
         }
     }
 
@@ -309,7 +328,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
                 onVideoSwitchScreenListener.onVideoSwitchScreen(orientation);
             } else {
                 videoHelper.switchScreen(getContext(), this, orientation);
-                setVideoDisplaySize(getMeasuredHeight(), getMeasuredWidth());
+                setDisplay(IJK.config().display(), getMeasuredHeight(), getMeasuredWidth());
             }
         }
     }
@@ -320,8 +339,8 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
      * @param display 显示类型
      */
     public void setDisplay(Display display) {
-        if (textureView != null) {
-            textureView.setDisplay(display);
+        if (textureView != null && mediaPlayer != null) {
+            textureView.setDisplay(display, getWidth(), getHeight(), iMediaPlayer.getVideoWidth(), iMediaPlayer.getVideoHeight());
         }
     }
 
@@ -343,13 +362,58 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     /**
      * 设置视频显示大小
      *
+     * @param display       显示类型
      * @param displayWidth  显示宽度
      * @param displayHeight 显示高度
      */
-    public void setVideoDisplaySize(int displayWidth, int displayHeight) {
+    public void setDisplay(Display display, int displayWidth, int displayHeight) {
         if (textureView != null && mediaPlayer != null) {
-            textureView.setVideoSize(displayWidth, displayHeight, mediaPlayer.getVideoWidth(), mediaPlayer.getVideoHeight());
+            textureView.setDisplay(display, displayWidth, displayHeight, iMediaPlayer.getVideoWidth(), iMediaPlayer.getVideoHeight());
         }
+    }
+
+    /**
+     * 设置视频显示高度和宽度
+     *
+     * @param width
+     * @param height
+     */
+    public void setDisplayParams(int width, int height) {
+        if (textureView != null) {
+            textureView.setDisplayParams(width, height);
+        }
+    }
+
+    /**
+     * 设置显示比例
+     *
+     * @param display 显示类型
+     * @param width   宽度值或宽比值，例如1920或16
+     * @param height  高度值或高比值，例如1080或9
+     */
+    public void setRatio(Display display, int width, int height) {
+        IJK ijk = IJK.config();
+        ijk.display(display);
+        ijk.ratio(width, height);
+        setDisplay(display);
+    }
+
+    /**
+     * 获取显示比例
+     *
+     * @return
+     */
+    public Ratio getDisplayRatio() {
+        return IJK.config().ratio();
+    }
+
+    /**
+     * 获取视频显示大小，注意：只有视频加载完成才能正常获取该视频的尺寸
+     *
+     * @return
+     */
+    public Size getVideoDisplaySize() {
+        return new Size(textureView.getMeasuredWidth(), textureView.getMeasuredHeight());
     }
 
     //************************************[SeekBar监听]**************************************
@@ -741,7 +805,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     //****************************************[TextureView - SurfaceTextureListener]**********************************************
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
-        Log.i(TAG, "onSurfaceTextureAvailable " + width + "," + height);
+        debug("surface texture available " + width + "," + height);
         surface = new Surface(surfaceTexture);
         videoHolder.setCoverVisibility(false);
         setSurface(surface);
@@ -749,21 +813,22 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int width, int height) {
-        Log.i(TAG, "onSurfaceTextureSizeChanged " + width + "," + height);
+        debug("surface texture size changed width:" + width + ",height" + height);
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
-        Log.i(TAG, "onSurfaceTextureDestroyed");
+        debug("surface texture destroyed");
         surface.release();
         return false;
     }
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-        Log.i(TAG, "onSurfaceTextureUpdated");
+        debug("surface texture updated");
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             videoHolder.setCoverVisibility(false);
+            videoHolder.setSpeedTextViewVisibility(false);
         }
     }
 
@@ -781,7 +846,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
         if (surface != null) {
             iMediaPlayer.setSurface(surface);
         }
-        Log.i(TAG, "onPrepared");
+        debug("prepared");
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoPrepared(iMediaPlayer);
         }
@@ -790,8 +855,8 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     @Override
     public void onVideoSizeChanged(IMediaPlayer iMediaPlayer, int width, int height, int sarNum, int sarDen) {
         this.iMediaPlayer = iMediaPlayer;
-        setVideoDisplaySize(getMeasuredWidth(), getMeasuredHeight());
-        Log.i(TAG, "onVideoSizeChanged width:" + width + ",height:" + height + ",sarNum：" + sarNum + ",sarDen:" + sarDen);
+        setDisplay(IJK.config().display(), getMeasuredWidth(), getMeasuredHeight(), width, height);
+        debug("video size changed width:" + width + ",height:" + height + ",sarNum：" + sarNum + ",sarDen:" + sarDen);
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoSizeChanged(iMediaPlayer, width, height, sarNum, sarDen);
         }
@@ -800,7 +865,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     @Override
     public boolean onInfo(IMediaPlayer iMediaPlayer, int what, int args) {
         this.iMediaPlayer = iMediaPlayer;
-        Log.i(TAG, "onInfo what:" + what + ",args:" + args);
+        debug("info what:" + what + ",args:" + args);
         if (what == IjkMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
             videoHolder.setPlayImageResource(R.mipmap.ic_ijk_play_control);
             if (onIJKVideoListener != null) {
@@ -870,7 +935,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     @Override
     public void onSeekComplete(IMediaPlayer iMediaPlayer) {
         this.iMediaPlayer = iMediaPlayer;
-        Log.i(TAG, "onSeekComplete");
+        debug("seek complete");
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoSeekComplete(iMediaPlayer);
         }
@@ -883,7 +948,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
         this.iMediaPlayer = iMediaPlayer;
         //播放完毕，进度条满格
         showVideoTime(iMediaPlayer.getDuration(), videoHolder.getCurrentView());
-        Log.i(TAG, "onCompletion");
+        debug("completion");
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoCompletion(iMediaPlayer);
         }
@@ -893,7 +958,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
     public boolean onError(IMediaPlayer iMediaPlayer, int framework_err, int impl_err) {
         dismissLoading();
         this.iMediaPlayer = iMediaPlayer;
-        Log.i(TAG, "onError framework_err:" + framework_err + ",impl_err:" + impl_err);
+        debug("error framework_err:\" + framework_err + \",impl_err:\" + impl_err");
         if (onIJKVideoListener != null) {
             onIJKVideoListener.onVideoError(iMediaPlayer, framework_err, impl_err);
         }
@@ -920,7 +985,7 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
                 long duration = isLiveSource() ? 0 : iMediaPlayer.getDuration();
                 liveStartTime = liveStartTime == 0 ? System.currentTimeMillis() : liveStartTime;
                 long current = isLiveSource() ? System.currentTimeMillis() - liveStartTime : iMediaPlayer.getCurrentPosition();
-                Log.i(TAG, "onVideoProgress duration=" + duration + ",current=" + current + ",isLiveSource=" + isLiveSource());
+                debug("video progress duration=" + duration + ",current=" + current + ",isLiveSource=" + isLiveSource());
                 showSpeed();
                 onVideoProgress(iMediaPlayer, duration, current);
                 if (onIJKVideoListener != null) {
@@ -1046,7 +1111,6 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
 
     }
 
-
     private OnClickListener onClickListener;
 
     @Override
@@ -1137,6 +1201,17 @@ public class VideoView extends FrameLayout implements android.view.TextureView.S
         super.onDetachedFromWindow();
         if (durationTimer != null) {
             durationTimer.stop();
+        }
+    }
+
+    /**
+     * 调试打印
+     *
+     * @param content
+     */
+    private void debug(String content) {
+        if (isDebug()) {
+            Log.d(TAG, content);
         }
     }
 

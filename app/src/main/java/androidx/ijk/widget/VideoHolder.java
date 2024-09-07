@@ -253,17 +253,19 @@ public class VideoHolder {
 
     /**
      * 设置中间图是否可见
+     *
      * @param show
      */
-    public void setCenterImageVisibility(boolean show){
-        getCenterImageView().setVisibility(show?View.VISIBLE:View.GONE);
+    public void setCenterImageVisibility(boolean show) {
+        getCenterImageView().setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     /**
      * 设置中间图资源id
+     *
      * @param resId
      */
-    public void setCenterImageResource(int resId){
+    public void setCenterImageResource(int resId) {
         getCenterImageView().setImageResource(resId);
     }
 
@@ -408,7 +410,7 @@ public class VideoHolder {
      * @return
      */
     public boolean isSpeedTextViewVisible() {
-        return getSpeedTextView().getVisibility() == View.VISIBLE;
+        return getSpeedTextView() != null && getSpeedTextView().getVisibility() == View.VISIBLE;
     }
 
     /**

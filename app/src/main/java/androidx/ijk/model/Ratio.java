@@ -3,7 +3,7 @@ package androidx.ijk.model;
 /**
  * 视频宽高比例
  */
-public class VideoRatio {
+public class Ratio {
 
     /**
      * 宽度比例值
@@ -20,7 +20,7 @@ public class VideoRatio {
      * @param width  例如16
      * @param height 例如9
      */
-    public VideoRatio(int width, int height) {
+    public Ratio(int width, int height) {
         this.width = width;
         this.height = height;
     }
@@ -41,8 +41,8 @@ public class VideoRatio {
         this.height = height;
     }
 
-    public float getRatio(){
-        return width*1.0f/height;
+    public float getRatio() {
+        return width * 1.0f / height;
     }
 
 }

@@ -49,7 +49,7 @@ public class VideoHelper {
 
 
     public VideoHelper() {
-        Log.d(TAG, "IJKHelper INIT");
+        Log.d(TAG, "VideoHelper INIT");
     }
 
     /**
@@ -63,6 +63,7 @@ public class VideoHelper {
 
     /**
      * 是否调试模式
+     *
      * @return
      */
     public boolean isDebug() {
@@ -120,7 +121,7 @@ public class VideoHelper {
         }
         //切换横屏
         if (orientation == Orientation.LANDSCAPE) {
-            Log.i(TAG, "switch screen to portrait");
+            debug("switch screen to landscape");
             //隐藏ActionBar
             if (activity.getSupportActionBar() != null) {
                 isHaveActionBar = activity.getSupportActionBar().isShowing();
@@ -133,7 +134,7 @@ public class VideoHelper {
             //隐藏状态栏
             activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         } else {
-            Log.i(TAG, "switch screen to portrait");
+            debug("switch screen to portrait");
             //显示ActionBar
             if (isHaveActionBar) {
                 activity.getSupportActionBar().show();
@@ -240,6 +241,10 @@ public class VideoHelper {
      * @return
      */
     public boolean onTouchEvent(Context context, boolean isLiveSource, MotionEvent event, View view, long current, long duration, OnVideoTouchListener listener) {
+        int pointerCount = event.getPointerCount();
+        if (pointerCount > 1) {
+            return true;
+        }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 downX = event.getX();
@@ -270,9 +275,7 @@ public class VideoHelper {
                 //垂直向下
                 boolean vbs = absDeltaY > absDeltaX && deltaY > 0 && angle >= 45 && angle <= 135;
                 //垂直向下
-                if (debug) {
-                    Log.d(TAG, "deltaX：" + deltaX + ",deltaY:" + deltaY + ",angle:" + angle + ",hls:" + hls + ",hrs:" + hrs + ",vts:" + vts + ",vbs:" + vbs);
-                }
+                debug("deltaX：" + deltaX + ",deltaY:" + deltaY + ",angle:" + angle + ",hls:" + hls + ",hrs:" + hrs + ",vts:" + vts + ",vbs:" + vbs);
                 boolean isHorizontalScroll = hls || hrs;
                 boolean isHorizontalType = scrollType == 1 || scrollType == -1;
                 if (isHorizontalType && isHorizontalScroll && isLiveSource == false) {
@@ -374,6 +377,16 @@ public class VideoHelper {
                 break;
         }
         return true;
+    }
+
+    /**
+     * 调试打印
+     * @param content
+     */
+    private void debug(String content){
+        if (isDebug()){
+            Log.d(TAG,content);
+        }
     }
 
 }
