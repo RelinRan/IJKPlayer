@@ -56,6 +56,18 @@ dependencies {
 	    implementation 'com.github.RelinRan:IJKPlayer:2024.9.7.1'
 	}
 ```
+源码中包含arm64-v8a armeabi-v7a x86 x86_64,可配置打包apk对应的ABI
+```
+android {
+    ...
+    defaultConfig {
+        ...
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'//只包含这些ABI
+        }
+    }
+}
+```
 #### 权限配置
 ```
 <uses-permission android:name="android.permission.INTERNET" />
