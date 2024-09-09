@@ -24,8 +24,7 @@ IJK集成播放器，拥有亮度调整、音量调整、视频全屏播放。
 15.手势滑动禁止多指滑动  
 16.偶尔出现加载网速不消失  
 
-#### [AAR]
-[aar文件](https://github.com/RelinRan/IJKPlayer/blob/master/aar)
+#### [AAR](https://github.com/RelinRan/IJKPlayer/blob/master/aar)
 ```
 android {
     ....
@@ -40,8 +39,7 @@ dependencies {
     implementation(name: 'IJKPlayer', ext: 'aar')
 }
 ```
-#### JitPack
-项目/build.grade
+#### Repositories
 ```
 allprojects {
     repositories {
@@ -50,25 +48,25 @@ allprojects {
 	}
 }
 ```
-项目/app/build.grade
+#### Dependencies
 ```
 dependencies {
 	    implementation 'com.github.RelinRan:IJKPlayer:2024.9.7.1'
 	}
 ```
-源码中包含arm64-v8a armeabi-v7a x86 x86_64,可配置打包apk对应的ABI
+#### ABI
 ```
 android {
     ...
     defaultConfig {
         ...
         ndk {
-            abiFilters 'armeabi-v7a', 'arm64-v8a'//只包含这些ABI
+            abiFilters 'armeabi-v7a', 'arm64-v8a'//源码中包含arm64-v8a armeabi-v7a x86 x86_64,可配置打包apk对应的ABI
         }
     }
 }
 ```
-#### 权限配置
+#### Permission
 ```
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -188,8 +186,8 @@ ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "reconnect", 1);
 //调用prepareAsync()方法后是否自动开始播放
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 1);
 ```
-#### rtmp直播流，刚播放时，画面卡顿几秒，没有声音大概4、5秒后都恢复正常
-不要配置probesize参数
+#### 常见问题
+rtmp直播流，刚播放时，画面卡顿几秒，没有声音大概4、5秒后都恢复正常;不要配置probesize参数
 ```
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 0);
 ijk.option(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "nobuffer");
